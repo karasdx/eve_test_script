@@ -17,7 +17,7 @@ orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site.png')
 wrap_to_0 = cv2.imread('wrap_to_0.png')
-target_structure = cv2.imread('target_structure.png')
+target_structure = cv2.imread('target_structure(1).png')
 dock_button = cv2.imread('dock_button.png')
 game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 
@@ -44,10 +44,12 @@ while True:
         index += 1
         # Define a threshold for match detection (adjust as needed)
         threshold = 0.8
+        # if index == 4:
+        #     threshold = 0.5
         print(index)
         # Locate the maximum match value in the result
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
+        print(max_val)
         # enemy spotted
 
         if max_val >= threshold:
@@ -79,11 +81,12 @@ while True:
 
                     pyautogui.click()
                     pyautogui.press("q")
-                    time.sleep(5)
+                    time.sleep(8)
                     pyautogui.press("d")
+                    exit()
             #change site
             else:
-                if idel_count > 5:
+                if idel_count > 20:
                     idel_count = 0
                     print("auto rat done!")
                     pyautogui.keyDown("shift")
@@ -98,7 +101,7 @@ while True:
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
                     result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
 
-                    threshold = 0.7
+                    threshold = 0.8
 
                     # Locate the maximum match value in the result
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -139,9 +142,9 @@ while True:
                             target_center_y = target_y
 
                             pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
-
-                            pyautogui.click()
                             time.sleep(8)
+                            pyautogui.click()
+                            time.sleep(5)
                             #check if wrap done
                             wrap_flag = True
                             while wrap_flag == True:

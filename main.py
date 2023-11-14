@@ -17,7 +17,7 @@ orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site.png')
 wrap_to_0 = cv2.imread('wrap_to_0.png')
-target_structure = cv2.imread('target_structure.png')
+target_structure = cv2.imread('target_structure(2).png')
 dock_button = cv2.imread('dock_button.png')
 game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 
@@ -55,7 +55,7 @@ while True:
         if max_val >= threshold:
             print('target found')
             if index !=4:
-                winsound.Beep(1000, 200)
+                winsound.Beep(1000, 2000)
                 print("enemy spotted!")
                 pyautogui.keyDown("shift")
                 pyautogui.press("r")
@@ -81,7 +81,7 @@ while True:
 
                     pyautogui.click()
                     pyautogui.press("q")
-                    time.sleep(5)
+                    time.sleep(14)
                     pyautogui.press("d")
                     exit()
             #change site
@@ -101,7 +101,7 @@ while True:
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
                     result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
 
-                    threshold = 0.7
+                    threshold = 0.8
 
                     # Locate the maximum match value in the result
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -142,9 +142,9 @@ while True:
                             target_center_y = target_y
 
                             pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
-
+                            time.sleep(14)
                             pyautogui.click()
-                            time.sleep(8)
+                            time.sleep(5)
                             #check if wrap done
                             wrap_flag = True
                             while wrap_flag == True:
@@ -171,11 +171,8 @@ while True:
                                     wrap_flag = False
                                     print('new rat site reach!')
                             pyautogui.keyDown("shift")
-                            time.sleep(1)
                             pyautogui.press("f")
-                            time.sleep(1)
                             pyautogui.keyUp("shift")
-                            time.sleep(1)
                             #start orbiting
                             result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
@@ -196,7 +193,6 @@ while True:
 
                                 pyautogui.click()
                                 pyautogui.press("w")
-                                time.sleep(1)
                                 pyautogui.press("f1")
                 else:
                     idel_count += 1
