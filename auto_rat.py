@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import numpy as np
 import pyautogui
 import pygetwindow as gw
 import time
@@ -11,8 +12,13 @@ images_to_check = [
     cv2.imread('enemy(2).png'),
     cv2.imread('enemy(3).png'),
     cv2.imread('drone.png'),
+    cv2.imread('dread.png'),
     # Add more images as needed
 ]
+undock = cv2.imread('undock.png')
+open_cargo = cv2.imread('open_cargo.png')
+loot_all = cv2.imread('loot_all.png')
+boss_wreck = cv2.imread('boss_wreck.png')
 orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site.png')
@@ -43,7 +49,7 @@ while True:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
         index += 1
         # Define a threshold for match detection (adjust as needed)
-        threshold = 0.8
+        threshold = 0.85
         # if index == 4:
         #     threshold = 0.5
         print(index)
@@ -81,9 +87,33 @@ while True:
 
                     pyautogui.click()
                     pyautogui.press("q")
-                    time.sleep(8)
+                    time.sleep(12)
                     pyautogui.press("d")
-                    exit()
+                    # exit()
+                    time.sleep(600)
+
+                    result = cv2.matchTemplate(game_screen, undock, cv2.TM_CCOEFF_NORMED)
+                    threshold = 0.8
+
+                    # Locate the maximum match value in the result
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    if max_val >= threshold:
+                        # Get the coordinates of the matched area
+                        target_width, target_height = target_structure.shape[:-1]
+                        target_X, target_y = max_loc
+
+                        target_center_x = target_X
+                        target_center_y = target_y
+
+                        pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+
+                        pyautogui.click()
+                        pyautogui.keyDown("shift")
+                        pyautogui.press("f")
+                        pyautogui.keyUp("shift")
+                        pyautogui.press("f2")
+                        pyautogui.press("f3")
+
             #change site
             else:
                 if idel_count > 20:
@@ -92,6 +122,7 @@ while True:
                     pyautogui.keyDown("shift")
                     pyautogui.press("r")
                     pyautogui.keyUp("shift")
+
                     # Capture the game screen
                     game_screen = pyautogui.screenshot(
                         region=(game_window.left, game_window.top, game_window.width, game_window.height))
@@ -99,8 +130,64 @@ while True:
                     # Convert to OpenCV format
                     game_screen = np.array(game_screen)
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-                    result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
 
+                    # loot boss
+                    result = cv2.matchTemplate(game_screen, boss_wreck, cv2.TM_CCOEFF_NORMED)
+                    threshold = 0.7
+
+                    # Locate the maximum match value in the result
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    if max_val >= threshold:
+                        # Get the coordinates of the matched area
+                        target_width, target_height = target_structure.shape[:-1]
+                        target_X, target_y = max_loc
+
+                        target_center_x = target_X
+                        target_center_y = target_y
+
+                        pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+
+                        pyautogui.rightClick()
+
+                        result = cv2.matchTemplate(game_screen, open_cargo, cv2.TM_CCOEFF_NORMED)
+                        threshold = 0.7
+
+                        # Locate the maximum match value in the result
+                        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                        if max_val >= threshold:
+                            # Get the coordinates of the matched area
+                            target_width, target_height = target_structure.shape[:-1]
+                            target_X, target_y = max_loc
+
+                            target_center_x = target_X
+                            target_center_y = target_y
+
+                            pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+
+                            pyautogui.click()
+                            time.sleep(40)
+
+                            #take the loot
+                            result = cv2.matchTemplate(game_screen, loot_all, cv2.TM_CCOEFF_NORMED)
+                            threshold = 0.7
+
+                            # Locate the maximum match value in the result
+                            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                            if max_val >= threshold:
+                                # Get the coordinates of the matched area
+                                target_width, target_height = target_structure.shape[:-1]
+                                target_X, target_y = max_loc
+
+                                target_center_x = target_X
+                                target_center_y = target_y
+
+                                pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+
+                                pyautogui.click()
+
+
+                    #change rat site
+                    result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
                     threshold = 0.8
 
                     # Locate the maximum match value in the result
@@ -127,7 +214,7 @@ while True:
                         #wrap to rat site
                         result = cv2.matchTemplate(game_screen, wrap_to_0, cv2.TM_CCOEFF_NORMED)
 
-                        threshold = 0.7
+                        threshold = 0.65
 
                         # Locate the maximum match value in the result
                         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
