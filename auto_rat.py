@@ -89,7 +89,7 @@ while True:
 
                     pyautogui.click()
                     pyautogui.press("q")
-                    time.sleep(11)
+                    time.sleep(13)
                     pyautogui.press("d")
                     # exit()
                     time.sleep(300)
@@ -118,7 +118,11 @@ while True:
 
                         pyautogui.click()
                         print("try to undock")
+
                         time.sleep(10)
+                        pyautogui.keyDown("ctrl")
+                        pyautogui.press("space")
+                        pyautogui.keyUp("ctrl")
                         pyautogui.keyDown("shift")
                         pyautogui.press("f")
                         pyautogui.keyUp("shift")
@@ -134,7 +138,6 @@ while True:
                     # Capture the game screen
                     game_screen = pyautogui.screenshot(
                         region=(game_window.left, game_window.top, game_window.width, game_window.height))
-
                     # Convert to OpenCV format
                     game_screen = np.array(game_screen)
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
@@ -147,11 +150,11 @@ while True:
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                     if max_val >= threshold:
                         # Get the coordinates of the matched area
-                        target_width, target_height = target_structure.shape[:-1]
+                        target_width, target_height = unlocked_target.shape[:-1]
                         target_X, target_y = max_loc
 
-                        target_center_x = target_X
-                        target_center_y = target_y
+                        target_center_x = target_X + target_width/2
+                        target_center_y = target_y + target_height/2
 
                         pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
 
