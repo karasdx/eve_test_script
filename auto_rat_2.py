@@ -6,6 +6,7 @@ import pygetwindow as gw
 import time
 import random
 import winsound
+
 print('1')
 images_to_check = [
     cv2.imread('enemy(1).png'),
@@ -25,9 +26,9 @@ orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
 wrap_to_0 = cv2.imread('wrap_to_30.png')
-target_structure = cv2.imread('target_structure(2).png')
+target_structure = cv2.imread('target_structure(1).png')
 dock_button = cv2.imread('dock_button.png')
-game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
+game_window = gw.getWindowsWithTitle('EVE - nova Xcs')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
@@ -45,7 +46,7 @@ while True:
     # Convert to OpenCV format
     game_screen = np.array(game_screen)
     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-    #check enemy
+    # check enemy
     index = 0
     for image_to_check in images_to_check:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
@@ -62,19 +63,17 @@ while True:
 
         if max_val >= threshold:
             print('target found')
-            if index !=4:
+            if index != 4:
                 winsound.Beep(1000, 200)
                 print("enemy spotted!")
-                pyautogui.moveTo(game_window.left, game_window.top,
-                                 duration=mouse_move_duration)
-
+                pyautogui.moveTo(game_window.left, game_window.top, duration=mouse_move_duration)
                 pyautogui.click()
                 pyautogui.keyDown("shift")
                 pyautogui.press("r")
                 pyautogui.keyUp("shift")
                 # Capture the game screen
 
-                #return to safe spot
+                # return to safe spot
                 result = cv2.matchTemplate(game_screen, target_structure, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
@@ -88,8 +87,9 @@ while True:
 
                     target_center_x = target_X
                     target_center_y = target_y
-                    
-                    pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+
+                    pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                     duration=mouse_move_duration)
 
                     pyautogui.click()
                     pyautogui.press("q")
@@ -118,7 +118,8 @@ while True:
                         target_center_x = target_X
                         target_center_y = target_y
 
-                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                         duration=mouse_move_duration)
 
                         pyautogui.click()
                         print("try to undock")
@@ -135,7 +136,7 @@ while True:
                         pyautogui.press("f4")
 
 
-            #change site
+            # change site
             else:
                 if idel_count > 30:
                     print('drone idle')
@@ -157,10 +158,11 @@ while True:
                         target_width, target_height = unlocked_target.shape[:-1]
                         target_X, target_y = max_loc
 
-                        target_center_x = target_X + target_width/2
-                        target_center_y = target_y + target_height/2
+                        target_center_x = target_X + target_width / 2
+                        target_center_y = target_y + target_height / 2
 
-                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                         duration=mouse_move_duration)
 
                         pyautogui.keyDown("ctrl")
                         pyautogui.click()
@@ -233,27 +235,25 @@ while True:
                             #     pyautogui.click()
                             #     time.sleep(50)
 
+                            # take the loot
+                            # result = cv2.matchTemplate(game_screen, loot_all, cv2.TM_CCOEFF_NORMED)
+                            # threshold = 0.7
+                            #
+                            # # Locate the maximum match value in the result
+                            # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                            # if max_val >= threshold:
+                            #     # Get the coordinates of the matched area
+                            #     target_width, target_height = target_structure.shape[:-1]
+                            #     target_X, target_y = max_loc
+                            #
+                            #     target_center_x = target_X
+                            #     target_center_y = target_y
+                            #
+                            #     pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                            #
+                            #     pyautogui.click()
 
-                                #take the loot
-                                # result = cv2.matchTemplate(game_screen, loot_all, cv2.TM_CCOEFF_NORMED)
-                                # threshold = 0.7
-                                #
-                                # # Locate the maximum match value in the result
-                                # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                                # if max_val >= threshold:
-                                #     # Get the coordinates of the matched area
-                                #     target_width, target_height = target_structure.shape[:-1]
-                                #     target_X, target_y = max_loc
-                                #
-                                #     target_center_x = target_X
-                                #     target_center_y = target_y
-                                #
-                                #     pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
-                                #
-                                #     pyautogui.click()
-
-
-                        #change rat site
+                        # change rat site
                         result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
                         threshold = 0.8
 
@@ -267,7 +267,8 @@ while True:
                             target_center_x = target_X
                             target_center_y = target_y
 
-                            pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                            pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                             duration=mouse_move_duration)
 
                             pyautogui.rightClick()
                             # Capture the game screen
@@ -277,14 +278,13 @@ while True:
                             # Convert to OpenCV format
                             game_screen = np.array(game_screen)
                             game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-                            #wrap to rat site
+                            # wrap to rat site
                             result = cv2.matchTemplate(game_screen, wrap_to_0, cv2.TM_CCOEFF_NORMED)
 
                             threshold = 0.65
 
                             # Locate the maximum match value in the result
                             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
 
                             if max_val >= threshold:
                                 # Get the coordinates of the matched area
@@ -294,17 +294,19 @@ while True:
                                 target_center_x = target_X
                                 target_center_y = target_y
 
-                                pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                                pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                                 duration=mouse_move_duration)
                                 time.sleep(15)
                                 pyautogui.click()
                                 time.sleep(10)
-                                #check if wrap done
+                                # check if wrap done
                                 wrap_flag = True
                                 while wrap_flag == True:
                                     time.sleep(1)
                                     # Capture the game screen
                                     game_screen = pyautogui.screenshot(
-                                        region=(game_window.left, game_window.top, game_window.width, game_window.height))
+                                        region=(
+                                        game_window.left, game_window.top, game_window.width, game_window.height))
 
                                     # Convert to OpenCV format
                                     game_screen = np.array(game_screen)
@@ -326,7 +328,7 @@ while True:
                                 pyautogui.keyDown("shift")
                                 pyautogui.press("f")
                                 pyautogui.keyUp("shift")
-                                #start orbiting
+                                # start orbiting
                                 result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
                                 threshold = 0.65
@@ -335,7 +337,6 @@ while True:
                                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
                                 if max_val >= threshold:
-                                    print("start orbiting")
                                     # Get the coordinates of the matched area
                                     target_width, target_height = target_structure.shape[:-1]
                                     target_X, target_y = max_loc
@@ -343,7 +344,8 @@ while True:
                                     target_center_x = target_X
                                     target_center_y = target_y
 
-                                    pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                                    pyautogui.moveTo(target_center_x + game_window.left,
+                                                     target_center_y + game_window.top, duration=mouse_move_duration)
 
                                     pyautogui.click()
                                     pyautogui.press("w")
