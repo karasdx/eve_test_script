@@ -13,6 +13,7 @@ images_to_check = [
     cv2.imread('enemy(3).png'),
     cv2.imread('drone.png'),
     cv2.imread('dread.png'),
+    cv2.imread('rat_site(xx).png'),
     # Add more images as needed
 ]
 unlocked_target = cv2.imread('unlocked_target.png')
@@ -47,6 +48,7 @@ while True:
     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
     #check enemy
     index = 0
+    boss_flag = 0
     for image_to_check in images_to_check:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
         index += 1
@@ -62,7 +64,7 @@ while True:
 
         if max_val >= threshold:
             print('target found')
-            if index !=4:
+            if index !=4 or index !=6:
                 winsound.Beep(1000, 200)
                 print("enemy spotted!")
                 pyautogui.moveTo(game_window.left, game_window.top,
@@ -134,7 +136,14 @@ while True:
                         pyautogui.press("f3")
                         pyautogui.press("f4")
 
-
+            elif index == 6:
+                if boss_flag == 0:
+                    boss_flag = 1
+                    print('boss wreck found')
+                    pyautogui.keyDown("ctrl")
+                    pyautogui.press("b")
+                    pyautogui.keyUp("ctrl")
+                    pyautogui.press("enter")
             #change site
             else:
                 if idel_count > 30:
@@ -191,26 +200,7 @@ while True:
                         game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
 
                         # loot boss
-                        result = cv2.matchTemplate(game_screen, boss_wreck, cv2.TM_CCOEFF_NORMED)
-                        threshold = 0.8
 
-                        # Locate the maximum match value in the result
-                        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                        if max_val >= threshold:
-                            # Get the coordinates of the matched area
-                            print('boss wreck found')
-                            target_width, target_height = target_structure.shape[:-1]
-                            target_X, target_y = max_loc
-
-                            target_center_x = target_X
-                            target_center_y = target_y
-
-                            # pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
-
-                            pyautogui.keyDown("ctrl")
-                            pyautogui.press("b")
-                            pyautogui.keyUp("ctrl")
-                            pyautogui.press("enter")
 
                             # result = cv2.matchTemplate(game_screen, submit, cv2.TM_CCOEFF_NORMED)
                             # threshold = 0.55
