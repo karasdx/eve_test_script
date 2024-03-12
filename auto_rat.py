@@ -13,20 +13,20 @@ images_to_check = [
     cv2.imread('enemy(3).png'),
     cv2.imread('drone.png'),
     cv2.imread('dread.png'),
-    cv2.imread('rat_site(xx).png'),
+    cv2.imread('boss_wreck(xx).png'),
     # Add more images as needed
 ]
 unlocked_target = cv2.imread('unlocked_target.png')
 undock = cv2.imread('undock.png')
 open_cargo = cv2.imread('open_cargo.png')
 loot_all = cv2.imread('loot_all.png')
-boss_wreck = cv2.imread('boss_wreck(xx).png')
+# boss_wreck = cv2.imread('boss_wreck(xx).png')
 submit = cv2.imread('submit.png')
 orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
 wrap_to_0 = cv2.imread('wrap_to_30.png')
-target_structure = cv2.imread('target_structure(2).png')
+target_structure = cv2.imread('target_structure(1).png')
 dock_button = cv2.imread('dock_button.png')
 game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 
@@ -34,6 +34,7 @@ game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
 
 idel_count = 0
+boss_flag = 0
 while True:
     random_number = random.randint(0, 2)
     time.sleep(1)
@@ -48,11 +49,11 @@ while True:
     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
     #check enemy
     index = 0
-    boss_flag = 0
+
     for image_to_check in images_to_check:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
         index += 1
-        # Define a threshold for match detection (adjust as needed)
+        # Define a threshold for` match detection (adjust as needed)
         threshold = 0.85
         # if index == 4:
         #     threshold = 0.5
@@ -64,9 +65,11 @@ while True:
 
         if max_val >= threshold:
             print('target found')
-            if index !=4 or index !=6:
+            if index !=4 and index !=6:
                 winsound.Beep(1000, 200)
                 print("enemy spotted!")
+                print(index)
+                print(max_val)
                 pyautogui.moveTo(game_window.left, game_window.top,
                                  duration=mouse_move_duration)
 
@@ -140,6 +143,10 @@ while True:
                 if boss_flag == 0:
                     boss_flag = 1
                     print('boss wreck found')
+                    pyautogui.moveTo(game_window.left, game_window.top,
+                                     duration=mouse_move_duration)
+
+                    pyautogui.click()
                     pyautogui.keyDown("ctrl")
                     pyautogui.press("b")
                     pyautogui.keyUp("ctrl")
@@ -316,6 +323,7 @@ while True:
                                 pyautogui.keyDown("shift")
                                 pyautogui.press("f")
                                 pyautogui.keyUp("shift")
+                                boss_flag = 0
                                 #start orbiting
                                 result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
