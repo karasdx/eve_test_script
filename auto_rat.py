@@ -35,6 +35,7 @@ mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
 
 idel_count = 0
 boss_flag = 0
+unlocked_target_count = 0
 while True:
     random_number = random.randint(0, 2)
     time.sleep(1)
@@ -135,9 +136,12 @@ while True:
                         pyautogui.keyDown("shift")
                         pyautogui.press("f")
                         pyautogui.keyUp("shift")
+                        idel_count = 35
+                        unlocked_target_count = 5
                         pyautogui.press("f2")
                         pyautogui.press("f3")
                         pyautogui.press("f4")
+                        pyautogui.press("f5")
 
             elif index == 6:
                 if boss_flag == 0:
@@ -153,39 +157,40 @@ while True:
                     pyautogui.press("enter")
             #change site
             else:
-                if idel_count > 30:
+                if idel_count > 20:
                     print('drone idle')
                     # Capture the game screen
-                    game_screen = pyautogui.screenshot(
-                        region=(game_window.left, game_window.top, game_window.width, game_window.height))
-                    # Convert to OpenCV format
-                    game_screen = np.array(game_screen)
-                    game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-
-                    # loot boss
-                    result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
-                    threshold = 0.7
-
-                    # Locate the maximum match value in the result
-                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                    if max_val >= threshold:
+                    # game_screen = pyautogui.screenshot(
+                    #     region=(game_window.left, game_window.top, game_window.width, game_window.height))
+                    # # Convert to OpenCV format
+                    # game_screen = np.array(game_screen)
+                    # game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
+                    #
+                    # #kill unlocked targets
+                    # result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
+                    # threshold = 0.6
+                    #
+                    # # Locate the maximum match value in the result
+                    # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    if unlocked_target_count < 3:
                         # Get the coordinates of the matched area
-                        target_width, target_height = unlocked_target.shape[:-1]
-                        target_X, target_y = max_loc
+                        # target_width, target_height = unlocked_target.shape[:-1]
+                        # target_X, target_y = max_loc
+                        #
+                        # target_center_x = target_X + target_width/2
+                        # target_center_y = target_y + target_height/2
+                        #
+                        # pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
+                        #
+                        # pyautogui.keyDown("ctrl")
+                        # pyautogui.click()
+                        # pyautogui.keyUp("ctrl")
 
-                        target_center_x = target_X + target_width/2
-                        target_center_y = target_y + target_height/2
-
-                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top, duration=mouse_move_duration)
-
-                        pyautogui.keyDown("ctrl")
-                        pyautogui.click()
-                        pyautogui.keyUp("ctrl")
-
-                        time.sleep(15)
+                        # time.sleep(15)
                         pyautogui.press("f")
                         print('drone engage locked target')
                         idel_count = 0
+                        unlocked_target_count += 1
 
                     else:
                         idel_count = 0
@@ -197,7 +202,7 @@ while True:
                         pyautogui.keyDown("shift")
                         pyautogui.press("r")
                         pyautogui.keyUp("shift")
-
+                        unlocked_target_count = 0
                         # Capture the game screen
                         game_screen = pyautogui.screenshot(
                             region=(game_window.left, game_window.top, game_window.width, game_window.height))
@@ -346,6 +351,8 @@ while True:
                                     pyautogui.click()
                                     pyautogui.press("w")
                                     pyautogui.press("f1")
+                                    pyautogui.press("f5")
+                                    unlocked_target_count = 0
 
                 else:
                     idel_count += 1

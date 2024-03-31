@@ -7,6 +7,61 @@ import time
 import random
 import winsound
 
+def lock_target(game_window, target_image):
+    game_screen = pyautogui.screenshot(
+        region=(game_window.left, game_window.top, game_window.width, game_window.height))
+    # Convert to OpenCV format
+    game_screen = np.array(game_screen)
+    game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
+
+    # loot boss
+    result = cv2.matchTemplate(game_screen, target_image, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.7
+
+    # Locate the maximum match value in the result
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    if max_val >= threshold:
+        # Get the coordinates of the matched area
+        target_width, target_height = unlocked_target.shape[:-1]
+        target_X, target_y = max_loc
+
+        target_center_x = target_X + target_width / 2
+        target_center_y = target_y + target_height / 2
+
+        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                         duration=mouse_move_duration)
+
+        pyautogui.keyDown("ctrl")
+        pyautogui.click()
+        pyautogui.keyUp("ctrl")
+
+def locate_target(game_window, target_image):
+    game_screen = pyautogui.screenshot(
+        region=(game_window.left, game_window.top, game_window.width, game_window.height))
+    # Convert to OpenCV format
+    game_screen = np.array(game_screen)
+    game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
+
+    # loot boss
+    result = cv2.matchTemplate(game_screen, target_image, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.7
+
+    # Locate the maximum match value in the result
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    if max_val >= threshold:
+        # Get the coordinates of the matched area
+        target_width, target_height = unlocked_target.shape[:-1]
+        target_X, target_y = max_loc
+
+        target_center_x = target_X
+        target_center_y = target_y
+
+        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                         duration=mouse_move_duration)
+
+        pyautogui.click()
+
+
 print('1')
 images_to_check = [
     cv2.imread('enemy(1).png'),
@@ -15,9 +70,15 @@ images_to_check = [
     cv2.imread('drone.png'),
     cv2.imread('dread.png'),
     cv2.imread('boss_wreck(xx).png'),
+    cv2.imread('cap_neutralized.png'),
+    cv2.imread('web.png'),
+    cv2.imread('disrupted.png'),
     # Add more images as needed
 ]
-unlocked_target = cv2.imread('unlocked_target.png')
+unlocked_target_list = [
+    cv2.imread('unlocked_target.png'),
+    cv2.imread('unlocked_target_1.png'),
+]
 undock = cv2.imread('undock.png')
 open_cargo = cv2.imread('open_cargo.png')
 loot_all = cv2.imread('loot_all.png')
@@ -66,7 +127,7 @@ while True:
 
         if max_val >= threshold:
             print('target found')
-            if index != 4 and index != 6:
+            if index != 4 and index != 6 and index != 7 and index != 8 and index != 9:
                 winsound.Beep(1000, 200)
                 print("enemy spotted!")
                 print(index)
@@ -141,6 +202,39 @@ while True:
                         pyautogui.press("f2")
                         pyautogui.press("f3")
                         pyautogui.press("f4")
+            #web / neutralized
+            elif index == 7 or index == 8 or index == 9:
+                print(index)
+                game_screen = pyautogui.screenshot(
+                    region=(game_window.left, game_window.top, game_window.width, game_window.height))
+                # Convert to OpenCV format
+                game_screen = np.array(game_screen)
+                game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
+
+                #
+                result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
+                threshold = 0.7
+
+                # Locate the maximum match value in the result
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                if max_val >= threshold:
+                    # Get the coordinates of the matched area
+                    target_width, target_height = image_to_check.shape[:-1]
+                    target_X, target_y = max_loc
+
+                    target_center_x = target_X + target_width / 2
+                    target_center_y = target_y + target_height / 2
+
+                    pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                     duration=mouse_move_duration)
+
+                    pyautogui.keyDown("ctrl")
+                    pyautogui.click()
+                    pyautogui.keyUp("ctrl")
+
+                    time.sleep(10)
+                    pyautogui.press("f")
+                    print('drone engage locked target')
 
             elif index == 6:
                 if boss_flag == 0:
@@ -166,31 +260,31 @@ while True:
                     game_screen = np.array(game_screen)
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
 
-                    # loot boss
-                    result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
-                    threshold = 0.7
+                    for unlocked_target in unlocked_target_list:
+                        result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
+                        threshold = 0.7
 
-                    # Locate the maximum match value in the result
-                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                    if max_val >= threshold:
-                        # Get the coordinates of the matched area
-                        target_width, target_height = unlocked_target.shape[:-1]
-                        target_X, target_y = max_loc
+                        # Locate the maximum match value in the result
+                        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                        if max_val >= threshold:
+                            # Get the coordinates of the matched area
+                            target_width, target_height = unlocked_target.shape[:-1]
+                            target_X, target_y = max_loc
 
-                        target_center_x = target_X + target_width / 2
-                        target_center_y = target_y + target_height / 2
+                            target_center_x = target_X + target_width / 2
+                            target_center_y = target_y + target_height / 2
 
-                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
-                                         duration=mouse_move_duration)
+                            pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                             duration=mouse_move_duration)
 
-                        pyautogui.keyDown("ctrl")
-                        pyautogui.click()
-                        pyautogui.keyUp("ctrl")
+                            pyautogui.keyDown("ctrl")
+                            pyautogui.click()
+                            pyautogui.keyUp("ctrl")
 
-                        time.sleep(15)
-                        pyautogui.press("f")
-                        print('drone engage locked target')
-                        idel_count = 0
+                            time.sleep(10)
+                            pyautogui.press("f")
+                            print('drone engage locked target')
+                            idel_count = 0
 
                     else:
                         idel_count = 0
