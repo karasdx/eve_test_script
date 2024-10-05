@@ -32,8 +32,8 @@ submit = cv2.imread('submit.png')
 orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
-wrap_to_0 = cv2.imread('wrap_to_50.png')
-target_structure = cv2.imread('target_structure(1).png')
+wrap_to_0 = cv2.imread('wrap_to_30.png')
+target_structure = cv2.imread('target_structure(3).png')
 dock_button = cv2.imread('dock_button.png')
 game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 
@@ -60,7 +60,7 @@ while True:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
         index += 1
         # Define a threshold for match detection (adjust as needed)
-        threshold = 0.85
+        threshold = 0.80
         # if index == 4:
         #     threshold = 0.5
         # print(index)
@@ -137,7 +137,7 @@ while True:
                         pyautogui.click()
                         print("try to undock")
 
-                        time.sleep(10)
+                        time.sleep(14)
                         pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
                                          duration=mouse_move_duration)
 
@@ -213,7 +213,7 @@ while True:
                     # Convert to OpenCV format
                     game_screen = np.array(game_screen)
                     game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-
+                    unlocked_target_flag = 0
                     for unlocked_target in unlocked_target_list:
                         result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
                         threshold = 0.7
@@ -239,8 +239,9 @@ while True:
                             pyautogui.press("f")
                             print('drone engage locked target')
                             idel_count = 0
+                            unlocked_target_flag = 1
 
-                    else:
+                    if unlocked_target_flag == 0:
                         idel_count = 0
                         print("auto rat done!")
                         pyautogui.moveTo(game_window.left, game_window.top,
