@@ -29,7 +29,7 @@ open_cargo = cv2.imread('open_cargo.png')
 loot_all = cv2.imread('loot_all.png')
 # boss_wreck = cv2.imread('boss_wreck(xx).png')
 submit = cv2.imread('submit.png')
-orbit_point = cv2.imread('orbit_point(1).png')
+orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
 wrap_to_0 = cv2.imread('wrap_to_10.png')
@@ -125,7 +125,7 @@ while True:
                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
                     if max_val >= threshold:
                         # Get the coordinates of the matched area
-                        target_width, target_height = target_structure.shape[:-1]
+                        target_width, target_height = undock.shape[:-1]
                         target_X, target_y = max_loc
 
                         target_center_x = target_X
@@ -302,6 +302,7 @@ while True:
                         #     pyautogui.click()
 
                         # change rat site
+                        print('changing rat site')
                         result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
                         threshold = 0.8
 
@@ -402,6 +403,7 @@ while True:
                                     pyautogui.keyUp("shift")
                                 else:
                                     # return to safe spot
+                                    print('fail to orbit,return to station')
                                     result = cv2.matchTemplate(game_screen, target_structure, cv2.TM_CCOEFF_NORMED)
                                     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
@@ -455,7 +457,7 @@ while True:
                                             pyautogui.click()
                                             print("try to undock")
 
-                                            time.sleep(10)
+                                            time.sleep(20)
                                             pyautogui.moveTo(target_center_x + game_window.left,
                                                              target_center_y + game_window.top,
                                                              duration=mouse_move_duration)
