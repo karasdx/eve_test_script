@@ -33,9 +33,9 @@ orbit_point = cv2.imread('orbit_point.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
 wrap_to_0 = cv2.imread('wrap_to_10.png')
-target_structure = cv2.imread('target_structure(1).png')
+target_structure = cv2.imread('target_structure(2).png')
 dock_button = cv2.imread('dock_button.png')
-game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
+game_window = gw.getWindowsWithTitle('EVE - nova Xcs')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
@@ -60,7 +60,7 @@ while True:
         result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
         index += 1
         # Define a threshold for match detection (adjust as needed)
-        threshold = 0.80
+        threshold = 0.82
         # if index == 4:
         #     threshold = 0.5
         # print(index)
@@ -378,7 +378,7 @@ while True:
                                 # start orbiting
                                 result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
-                                threshold = 0.65
+                                threshold = 0.60
 
                                 # Locate the maximum match value in the result
                                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -389,8 +389,8 @@ while True:
                                     target_width, target_height = target_structure.shape[:-1]
                                     target_X, target_y = max_loc
 
-                                    target_center_x = target_X
-                                    target_center_y = target_y
+                                    target_center_x = target_X + target_width / 2
+                                    target_center_y = target_y + target_height / 2
 
                                     pyautogui.moveTo(target_center_x + game_window.left,
                                                      target_center_y + game_window.top, duration=mouse_move_duration)
