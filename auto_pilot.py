@@ -9,7 +9,7 @@ target_gate = cv2.imread('target_gate.png')
 jump_button = cv2.imread('jump_button.png')
 flag = cv2.imread('warping.png')
 
-game_window = gw.getWindowsWithTitle('EVE - Six Left')[0]
+game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.5  # Adjust as needed for slower or faster movement
@@ -57,7 +57,8 @@ while True:
             target_center_y = target_y + target_height // 2
 
             # Simulate a right-click at the center of the matched area with slower mouse movement
-            pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+            pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                             duration=mouse_move_duration)
             pyautogui.click()
             pyautogui.press("d")
         else:

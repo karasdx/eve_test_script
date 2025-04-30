@@ -23,6 +23,7 @@ images_to_check = [
 unlocked_target_list = [
     cv2.imread('unlocked_target.png'),
     cv2.imread('unlocked_target_1.png'),
+    cv2.imread('unlocked_target_2.png'),
 ]
 undock = cv2.imread('undock.png')
 open_cargo = cv2.imread('open_cargo.png')
@@ -427,7 +428,7 @@ while True:
                                         time.sleep(13)
                                         pyautogui.press("d")
                                         # exit()
-                                        time.sleep(10)
+                                        time.sleep(60)
 
                                         # Capture the game screen
                                         game_screen = pyautogui.screenshot(
@@ -473,6 +474,11 @@ while True:
                                             pyautogui.press("f3")
                                             pyautogui.press("f4")
                                             idel_count = 35
+                            else:
+                                print("fail to change site.")
+                                pyautogui.keyDown("shift")
+                                pyautogui.press("r")
+                                pyautogui.keyUp("shift")
 
 
                 else:
