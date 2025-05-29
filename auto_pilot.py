@@ -15,7 +15,7 @@ game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
 mouse_move_duration = 0.5  # Adjust as needed for slower or faster movement
 count = 0
 while True:
-    random_number = random.randint(1, 3)
+    random_number = random.randint(3, 6)
     time.sleep(random_number)
     print('running')
     # Capture the game screen
@@ -59,8 +59,10 @@ while True:
             # Simulate a right-click at the center of the matched area with slower mouse movement
             pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
                              duration=mouse_move_duration)
-            pyautogui.click()
+
             pyautogui.press("d")
+            pyautogui.click()
+
         else:
             count += 1
             if count > 10:

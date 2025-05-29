@@ -30,7 +30,7 @@ open_cargo = cv2.imread('open_cargo.png')
 loot_all = cv2.imread('loot_all.png')
 # boss_wreck = cv2.imread('boss_wreck(xx).png')
 submit = cv2.imread('submit.png')
-orbit_point = cv2.imread('orbit_point.png')
+orbit_point = cv2.imread('orbit_point_new.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site(xx).png')
 wrap_to_0 = cv2.imread('wrap_to_10.png')
@@ -107,7 +107,7 @@ while True:
                     pyautogui.click()
                     pyautogui.press("f1")
                     pyautogui.press("q")
-                    time.sleep(12)
+                    time.sleep(10)
                     pyautogui.press("d")
                     # exit()
                     time.sleep(300)
@@ -152,7 +152,7 @@ while True:
                         pyautogui.press("f2")
                         pyautogui.press("f3")
                         pyautogui.press("f4")
-                        idel_count = 35
+                        idel_count = 55
             #web / neutralized
             elif index == 7 or index == 8 or index == 9:
                 print(index)
@@ -205,7 +205,7 @@ while True:
                     pyautogui.press("enter")
             # change site
             else:
-                if idel_count > 30:
+                if idel_count > 40:
                     boss_flag = 0
                     print('drone idle')
                     # Capture the game screen
@@ -352,7 +352,7 @@ while True:
                                 # check if wrap done
                                 wrap_flag = True
                                 while wrap_flag == True:
-                                    time.sleep(1)
+                                    time.sleep(5)
                                     # Capture the game screen
                                     game_screen = pyautogui.screenshot(
                                         region=(
@@ -379,7 +379,7 @@ while True:
                                 # start orbiting
                                 result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
-                                threshold = 0.60
+                                threshold = 0.85
 
                                 # Locate the maximum match value in the result
                                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -476,6 +476,7 @@ while True:
                                             idel_count = 35
                             else:
                                 print("fail to change site.")
+                                time.sleep(5)
                                 pyautogui.keyDown("shift")
                                 pyautogui.press("r")
                                 pyautogui.keyUp("shift")
