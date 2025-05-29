@@ -15,7 +15,7 @@ game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
 mouse_move_duration = 0.5  # Adjust as needed for slower or faster movement
 count = 0
 while True:
-    random_number = random.randint(3, 6)
+    random_number = random.randint(1, 3)
     time.sleep(random_number)
     print('running')
     # Capture the game screen
@@ -39,7 +39,13 @@ while True:
         print("warping!")
 
     else:
+        time.sleep(15)
         # Search for the target image within the game screen
+        game_screen = pyautogui.screenshot(
+            region=(game_window.left, game_window.top, game_window.width, game_window.height))
+
+        game_screen = np.array(game_screen)
+        game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
         result = cv2.matchTemplate(game_screen, target_gate, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
@@ -59,10 +65,14 @@ while True:
             # Simulate a right-click at the center of the matched area with slower mouse movement
             pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
                              duration=mouse_move_duration)
-
-            pyautogui.press("d")
             pyautogui.click()
-
+            pyautogui.press("q")
+            time.sleep(1)
+            pyautogui.press("f2")
+            pyautogui.press("f1")
+            time.sleep(8)
+            pyautogui.press("f1")
+            pyautogui.press("d")
         else:
             count += 1
             if count > 10:
