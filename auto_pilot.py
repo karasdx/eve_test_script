@@ -9,7 +9,7 @@ target_gate = cv2.imread('target_gate.png')
 jump_button = cv2.imread('jump_button.png')
 flag = cv2.imread('warping.png')
 
-game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
+game_window = gw.getWindowsWithTitle('EVE - bot7420')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.5  # Adjust as needed for slower or faster movement
@@ -68,11 +68,14 @@ while True:
             pyautogui.click()
             pyautogui.press("q")
             time.sleep(1)
-            pyautogui.press("f2")
-            pyautogui.press("f1")
-            time.sleep(8)
-            pyautogui.press("f1")
+            # pyautogui.press("f2")
+            # pyautogui.press("f1")
+            # time.sleep(8)
+            # pyautogui.press("f1")
             pyautogui.press("d")
+            time.sleep(1)
+            pyautogui.keyDown("ctrl")
+            pyautogui.keyUp("ctrl")
         else:
             count += 1
             if count > 10:
