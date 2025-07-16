@@ -14,7 +14,7 @@ images_to_check = [
     cv2.imread('enemy(3).png'),
     cv2.imread('drone.png'),
     cv2.imread('dread.png'),
-    cv2.imread('boss_wreck(xx).png'),
+    cv2.imread('boss_wreck.png'),
     cv2.imread('cap_neutralized.png'),
     cv2.imread('web.png'),
     cv2.imread('disrupted.png'),
@@ -32,11 +32,11 @@ loot_all = cv2.imread('loot_all.png')
 submit = cv2.imread('submit.png')
 orbit_point = cv2.imread('orbit_point_new.png')
 flag = cv2.imread('warping.png')
-rat_site = cv2.imread('rat_site(xx).png')
+rat_site = cv2.imread('rat_site.png')
 wrap_to_0 = cv2.imread('wrap_to_10.png')
 target_structure = cv2.imread('target_structure(2).png')
 dock_button = cv2.imread('dock_button.png')
-game_window = gw.getWindowsWithTitle('EVE - nova Xcs')[0]
+game_window = gw.getWindowsWithTitle('EVE - Surt Boe Agalder')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
@@ -107,7 +107,7 @@ while True:
                     pyautogui.click()
                     pyautogui.press("f1")
                     pyautogui.press("q")
-                    time.sleep(10)
+                    time.sleep(12)
                     pyautogui.press("d")
                     # exit()
                     time.sleep(300)
@@ -480,7 +480,8 @@ while True:
                                 pyautogui.keyDown("shift")
                                 pyautogui.press("r")
                                 pyautogui.keyUp("shift")
-
+                        else:
+                            print("fail to find a new site")
 
                 else:
                     idel_count += 1
