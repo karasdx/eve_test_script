@@ -18,6 +18,7 @@ images_to_check = [
     cv2.imread('cap_neutralized.png'),
     cv2.imread('web.png'),
     cv2.imread('disrupted.png'),
+    cv2.imread('painted.png'),
     # Add more images as needed
 ]
 unlocked_target_list = [
@@ -34,9 +35,9 @@ orbit_point = cv2.imread('orbit_point_new.png')
 flag = cv2.imread('warping.png')
 rat_site = cv2.imread('rat_site.png')
 wrap_to_0 = cv2.imread('wrap_to_10.png')
-target_structure = cv2.imread('target_structure(2).png')
+target_structure = cv2.imread('target_structure(1).png')
 dock_button = cv2.imread('dock_button.png')
-game_window = gw.getWindowsWithTitle('EVE - Surt Boe Agalder')[0]
+game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
@@ -72,7 +73,7 @@ while True:
 
         if max_val >= threshold:
             print('target found')
-            if index != 4 and index != 6 and index != 7 and index != 8 and index != 9:
+            if index != 4 and index != 6 and index != 7 and index != 8 and index != 9 and index != 10:
                 winsound.Beep(1000, 200)
                 print("enemy spotted!")
                 print(index)
@@ -154,7 +155,7 @@ while True:
                         pyautogui.press("f4")
                         idel_count = 55
             #web / neutralized
-            elif index == 7 or index == 8 or index == 9:
+            elif index == 7 or index == 8 or index == 9 or index == 10:
                 print(index)
                 game_screen = pyautogui.screenshot(
                     region=(game_window.left, game_window.top, game_window.width, game_window.height))
