@@ -9,7 +9,7 @@ target_gate = cv2.imread('target_gate.png')
 jump_button = cv2.imread('jump_button.png')
 flag = cv2.imread('warping.png')
 
-game_window = gw.getWindowsWithTitle('EVE - fighter trainee')[0]
+game_window = gw.getWindowsWithTitle('EVE - Scarlettt Tivianne')[0]
 
 # Define the duration (in seconds) for mouse movements
 mouse_move_duration = 0.5  # Adjust as needed for slower or faster movement
