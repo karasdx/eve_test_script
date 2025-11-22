@@ -378,7 +378,7 @@ while True:
                                     else:
                                         wrap_flag = False
                                         print('new rat site reach!')
-
+                                        time.sleep(3)
                                 # start orbiting
                                 result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
 
