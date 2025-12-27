@@ -108,7 +108,7 @@ while True:
                     pyautogui.click()
                     pyautogui.press("f1")
                     pyautogui.press("q")
-                    time.sleep(15)
+                    time.sleep(16)
                     pyautogui.press("d")
                     # exit()
                     time.sleep(300)
