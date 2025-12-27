@@ -140,10 +140,6 @@ while True:
                         print("try to undock")
 
                         time.sleep(14)
-                        pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
-                                         duration=mouse_move_duration)
-
-                        pyautogui.click()
                         pyautogui.keyDown("ctrl")
                         pyautogui.press("space")
                         pyautogui.keyUp("ctrl")
