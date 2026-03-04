@@ -19,6 +19,7 @@ images_to_check = [
     cv2.imread('web.png'),
     cv2.imread('disrupted.png'),
     cv2.imread('painted.png'),
+    cv2.imread('babo.png'),
     # Add more images as needed
 ]
 unlocked_target_list = [
