@@ -1,198 +1,107 @@
+"""
+Usage:
+    python main.py rat                                  # default profile
+    python main.py rat --profile surt --profile boah    # two ratting bots at once
+    python main.py autopilot --profile boah
+    python main.py multi --bot surt=rat --bot boah=autopilot   # mix modes
+    python main.py alarm --profile cez --profile luck --profile zhycnu
+    python main.py alarm --window "EVE - Some Name" --once
+    python main.py calibrate --profile surt             # suggest search regions
+
+Several bots share ONE mouse and keyboard: they take turns for each short
+burst of input, so keep the clients tiled side by side (not overlapping, not
+minimised) and don't use the PC while they run.
+"""
+import argparse
+import os
+
 import cv2
-import numpy as np
-import pyautogui
-import pygetwindow as gw
-import time
-import random
-import winsound
-print('1')
-images_to_check = [
-    cv2.imread('enemy(1).png'),
-    cv2.imread('enemy(2).png'),
-    cv2.imread('enemy(3).png'),
-    cv2.imread('drone.png'),
-    # Add more images as needed
-]
-orbit_point = cv2.imread('orbit_point.png')
-flag = cv2.imread('warping.png')
-rat_site = cv2.imread('rat_site.png')
-wrap_to_0 = cv2.imread('wrap_to_0.png')
-target_structure = cv2.imread('target_structure(2).png')
-dock_button = cv2.imread('dock_button.png')
-game_window = gw.getWindowsWithTitle('EVE - Boah Tsasa')[0]
 
-# Define the duration (in seconds) for mouse movements
-mouse_move_duration = 0.2  # Adjust as needed for slower or faster movement
+import config
+from bot import Actions, Controls, Screen, find_window, load_templates
+from bot.input_lock import InputLock
+from bot.modes import Alarm, Autopilot, Ratting, calibrate
+from bot.runner import run_bots
+from bot.window import overlapping
 
-idel_count = 0
-while True:
-    random_number = random.randint(0, 2)
-    time.sleep(1)
-    print('running')
-
-    # Capture the game screen
-    game_screen = pyautogui.screenshot(
-        region=(game_window.left, game_window.top, game_window.width, game_window.height))
-
-    # Convert to OpenCV format
-    game_screen = np.array(game_screen)
-    game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-    #check enemy
-    index = 0
-    for image_to_check in images_to_check:
-        result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
-        index += 1
-        # Define a threshold for match detection (adjust as needed)
-        threshold = 0.8
-        # if index == 4:
-        #     threshold = 0.5
-        print(index)
-        # Locate the maximum match value in the result
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-        print(max_val)
-        # enemy spotted
-
-        if max_val >= threshold:
-            print('target found')
-            if index !=4:
-                winsound.Beep(1000, 2000)
-                print("enemy spotted!")
-                pyautogui.keyDown("shift")
-                pyautogui.press("r")
-                pyautogui.keyUp("shift")
-                # Capture the game screen
-
-                #return to safe spot
-                result = cv2.matchTemplate(game_screen, target_structure, cv2.TM_CCOEFF_NORMED)
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-
-                # Define a threshold for match detection
-                threshold = 0.8
-
-                if max_val >= threshold:
-                    # Get the coordinates of the matched area
-                    target_width, target_height = target_structure.shape[:-1]
-                    target_X, target_y = max_loc
-
-                    target_center_x = target_X
-                    target_center_y = target_y
-
-                    pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
-
-                    pyautogui.click()
-                    pyautogui.press("q")
-                    time.sleep(14)
-                    pyautogui.press("d")
-                    exit()
-            #change site
-            else:
-                if idel_count > 20:
-                    idel_count = 0
-                    print("auto rat done!")
-                    pyautogui.keyDown("shift")
-                    pyautogui.press("r")
-                    pyautogui.keyUp("shift")
-                    # Capture the game screen
-                    game_screen = pyautogui.screenshot(
-                        region=(game_window.left, game_window.top, game_window.width, game_window.height))
-
-                    # Convert to OpenCV format
-                    game_screen = np.array(game_screen)
-                    game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-                    result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
-
-                    threshold = 0.8
-
-                    # Locate the maximum match value in the result
-                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                    if max_val >= threshold:
-                        # Get the coordinates of the matched area
-                        target_width, target_height = target_structure.shape[:-1]
-                        target_X, target_y = max_loc
-
-                        target_center_x = target_X
-                        target_center_y = target_y
-
-                        pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
-
-                        pyautogui.rightClick()
-
-                        # Capture the game screen
-                        game_screen = pyautogui.screenshot(
-                            region=(game_window.left, game_window.top, game_window.width, game_window.height))
-
-                        # Convert to OpenCV format
-                        game_screen = np.array(game_screen)
-                        game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-                        #wrap to rat site
-                        result = cv2.matchTemplate(game_screen, wrap_to_0, cv2.TM_CCOEFF_NORMED)
-
-                        threshold = 0.7
-
-                        # Locate the maximum match value in the result
-                        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+MODES = {"rat": Ratting, "autopilot": Autopilot}
 
 
-                        if max_val >= threshold:
-                            # Get the coordinates of the matched area
-                            target_width, target_height = target_structure.shape[:-1]
-                            target_X, target_y = max_loc
+def parse_args():
+    p = argparse.ArgumentParser(description="EVE screen-reading helper")
+    p.add_argument("mode", choices=["rat", "autopilot", "multi", "alarm", "calibrate"])
+    p.add_argument("--profile", action="append", choices=sorted(config.PROFILES),
+                   help="character from config.PROFILES (repeat for several clients)")
+    p.add_argument("--window", action="append", help="exact window title instead of a profile")
+    p.add_argument("--bot", action="append", metavar="PROFILE=MODE",
+                   help="multi mode: e.g. --bot surt=rat --bot boah=autopilot")
+    p.add_argument("--once", action="store_true", help="alarm: exit after the first alert")
+    return p.parse_args()
 
-                            target_center_x = target_X
-                            target_center_y = target_y
 
-                            pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
-                            time.sleep(14)
-                            pyautogui.click()
-                            time.sleep(5)
-                            #check if wrap done
-                            wrap_flag = True
-                            while wrap_flag == True:
-                                time.sleep(1)
-                                # Capture the game screen
-                                game_screen = pyautogui.screenshot(
-                                    region=(game_window.left, game_window.top, game_window.width, game_window.height))
+def resolve_title(name):
+    return config.PROFILES.get(name, name)
 
-                                # Convert to OpenCV format
-                                game_screen = np.array(game_screen)
-                                game_screen = cv2.cvtColor(game_screen, cv2.COLOR_RGB2BGR)
-                                result = cv2.matchTemplate(game_screen, flag, cv2.TM_CCOEFF_NORMED)
 
-                                # Define a threshold for match detection (adjust as needed)
-                                threshold = 0.8
+def bot_list(args):
+    """[(window title, mode)] for the requested bots."""
+    if args.mode == "multi":
+        if not args.bot:
+            raise SystemExit("multi mode needs at least one --bot PROFILE=MODE")
+        pairs = []
+        for spec in args.bot:
+            name, _, mode = spec.partition("=")
+            if mode not in MODES:
+                raise SystemExit(f"--bot {spec}: mode must be one of {', '.join(MODES)}")
+            pairs.append((resolve_title(name), mode))
+        return pairs
+    titles = [config.PROFILES[p] for p in (args.profile or [])] + (args.window or [])
+    titles = titles or [config.PROFILES[config.DEFAULT_PROFILE]]
+    return [(t, args.mode) for t in titles]
 
-                                # Locate the maximum match value in the result
-                                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
-                                # Check if the maximum match value exceeds the threshold
-                                if max_val >= threshold:
-                                    print("warping!")
-                                else:
-                                    wrap_flag = False
-                                    print('new rat site reach!')
-                            pyautogui.keyDown("shift")
-                            pyautogui.press("f")
-                            pyautogui.keyUp("shift")
-                            #start orbiting
-                            result = cv2.matchTemplate(game_screen, orbit_point, cv2.TM_CCOEFF_NORMED)
+def warn_layout(windows):
+    for problem in overlapping(windows):
+        print("WARNING:", problem)
 
-                            threshold = 0.7
 
-                            # Locate the maximum match value in the result
-                            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+def main():
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    args = parse_args()
+    bots = bot_list(args)
+    # several bots in parallel -> keep each one's OpenCV to a single thread
+    cv2.setNumThreads(1 if len(bots) > 1 else config.CV_THREADS)
+    templates = load_templates(config.IMAGE_DIR, config.TEMPLATES)
 
-                            if max_val >= threshold:
-                                # Get the coordinates of the matched area
-                                target_width, target_height = target_structure.shape[:-1]
-                                target_X, target_y = max_loc
+    windows = {title: find_window(title) for title, _ in bots}
+    warn_layout(list(windows.values()))
 
-                                target_center_x = target_X
-                                target_center_y = target_y
+    if args.mode == "alarm":
+        screens = {t: Screen(w, templates) for t, w in windows.items()}
+        Alarm(screens, config, once=args.once).run()
+        return
 
-                                pyautogui.moveTo(target_center_x, target_center_y, duration=mouse_move_duration)
+    if args.mode == "calibrate":
+        calibrate(Screen(windows[bots[0][0]], templates), templates)
+        return
 
-                                pyautogui.click()
-                                pyautogui.press("w")
-                                pyautogui.press("f1")
-                else:
-                    idel_count += 1
+    lock = InputLock()                       # shared by every bot
+    runnables = []
+    for title, mode in bots:
+        name = title.removeprefix("EVE - ")
+        controls = Controls(config.KEY_HOLD_SECONDS, config.KEY_GAP_SECONDS,
+                            config.MOUSE_MOVE_SECONDS, config.USE_DIRECTINPUT)
+        actions = Actions(Screen(windows[title], templates), controls,
+                          config.KEYS, config.TIMING, lock=lock, name=name)
+        runnables.append((name, MODES[mode](actions, config).run))
+
+    print("Running", ", ".join(f"{n} ({m})" for (n, _), (_, m) in zip(runnables, bots)))
+    print("Stop: Ctrl+C, or move the mouse into a screen corner.\n")
+    run_bots(runnables)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nstopped")
