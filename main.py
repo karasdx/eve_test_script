@@ -1,5 +1,6 @@
 """
 Usage:
+    python main.py                                      # menu: pick one function + one character
     python main.py rat                                  # default profile
     python main.py rat --profile surt --profile boah    # two ratting bots at once
     python main.py autopilot --profile boah
@@ -14,6 +15,7 @@ minimised) and don't use the PC while they run.
 """
 import argparse
 import os
+import sys
 
 import cv2
 
@@ -27,7 +29,42 @@ from bot.window import overlapping
 MODES = {"rat": Ratting, "autopilot": Autopilot}
 
 
+MENU = [
+    ("rat", "Ratting"),
+    ("autopilot", "Autopilot"),
+    ("alarm", "Local alarm"),
+    ("calibrate", "Calibrate search regions"),
+]
+
+
+def pick(prompt, options, default=0):
+    """Numbered menu; returns the index chosen (Enter = default)."""
+    print(prompt)
+    for i, label in enumerate(options, 1):
+        print(f"  {i}. {label}" + ("  (default)" if i - 1 == default else ""))
+    while True:
+        answer = input("> ").strip()
+        if not answer:
+            return default
+        if answer.isdigit() and 1 <= int(answer) <= len(options):
+            return int(answer) - 1
+        print(f"Enter a number from 1 to {len(options)}.")
+
+
+def menu_args():
+    """No command-line arguments: choose ONE function and ONE character."""
+    mode = MENU[pick("Which function to run?", [label for _, label in MENU])][0]
+    names = sorted(config.PROFILES)
+    profile = names[pick("\nWhich character?",
+                         [f"{n}  ({config.PROFILES[n]})" for n in names],
+                         default=names.index(config.DEFAULT_PROFILE))]
+    print()
+    return argparse.Namespace(mode=mode, profile=[profile], window=None, bot=None, once=False)
+
+
 def parse_args():
+    if len(sys.argv) == 1:
+        return menu_args()
     p = argparse.ArgumentParser(description="EVE screen-reading helper")
     p.add_argument("mode", choices=["rat", "autopilot", "multi", "alarm", "calibrate"])
     p.add_argument("--profile", action="append", choices=sorted(config.PROFILES),
