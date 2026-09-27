@@ -171,7 +171,7 @@ def main():
     lock = InputLock()                       # shared by every bot
     runnables = []
     for title, mode in bots:
-        name = title.removeprefix("EVE - ")
+        name = title[len("EVE - "):] if title.startswith("EVE - ") else title
         controls = Controls(config.KEY_HOLD_SECONDS, config.KEY_GAP_SECONDS,
                             config.MOUSE_MOVE_SECONDS, config.USE_DIRECTINPUT)
         actions = Actions(Screen(windows[title], templates), controls,

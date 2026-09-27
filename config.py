@@ -33,7 +33,9 @@ def load_profiles(path=CHARACTERS_FILE):
         name, sep, character = (part.strip() for part in line.partition("="))
         if not sep or not name or not character:
             raise SystemExit(f"{path.name} line {n}: expected 'short name = character name', got: {line}")
-        profiles[name] = "EVE - " + character.removeprefix("EVE - ")
+        if character.startswith("EVE - "):      # accept either form
+            character = character[len("EVE - "):]
+        profiles[name] = "EVE - " + character
     if not profiles:
         raise SystemExit(f"{path.name} has no characters in it")
     return profiles
