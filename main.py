@@ -15,6 +15,7 @@ minimised) and don't use the PC while they run.
 """
 import argparse
 import os
+import subprocess
 import sys
 
 import cv2
@@ -54,12 +55,30 @@ def pick(prompt, options, default=0):
 def menu_args():
     """No command-line arguments: choose ONE function and ONE character."""
     mode = MENU[pick("Which function to run?", [label for _, label in MENU])][0]
-    names = sorted(config.PROFILES)
-    profile = names[pick("\nWhich character?",
-                         [f"{n}  ({config.PROFILES[n]})" for n in names],
-                         default=names.index(config.DEFAULT_PROFILE))]
+    while True:
+        names = list(config.PROFILES)
+        choice = pick("\nWhich character?",
+                      [f"{n}  ({config.PROFILES[n]})" for n in names]
+                      + [f"Edit characters (opens {config.CHARACTERS_FILE.name})"])
+        if choice < len(names):
+            break
+        edit_characters()
     print()
-    return argparse.Namespace(mode=mode, profile=[profile], window=None, bot=None, once=False)
+    return argparse.Namespace(mode=mode, profile=[names[choice]], window=None, bot=None, once=False)
+
+
+def edit_characters():
+    """Open characters.txt in Notepad, wait for it to close, then reload."""
+    while True:
+        print(f"Edit {config.CHARACTERS_FILE.name}, save, then close Notepad to continue.")
+        subprocess.run(["notepad.exe", str(config.CHARACTERS_FILE)])
+        try:
+            config.PROFILES = config.load_profiles()
+        except SystemExit as e:
+            print(f"Problem: {e}\nOpening it again so you can fix it.\n")
+            continue
+        config.DEFAULT_PROFILE = next(iter(config.PROFILES))
+        return
 
 
 def parse_args():
@@ -68,7 +87,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="EVE screen-reading helper")
     p.add_argument("mode", choices=["rat", "autopilot", "multi", "alarm", "calibrate"])
     p.add_argument("--profile", action="append", choices=sorted(config.PROFILES),
-                   help="character from config.PROFILES (repeat for several clients)")
+                   help="character from characters.txt (repeat for several clients)")
     p.add_argument("--window", action="append", help="exact window title instead of a profile")
     p.add_argument("--bot", action="append", metavar="PROFILE=MODE",
                    help="multi mode: e.g. --bot surt=rat --bot boah=autopilot")
@@ -138,7 +157,24 @@ def main():
 
 
 if __name__ == "__main__":
+    from_menu = len(sys.argv) == 1          # e.g. double-clicked: keep the window open
     try:
         main()
     except KeyboardInterrupt:
         print("\nstopped")
+    except SystemExit as e:
+        if not from_menu:
+            raise
+        if e.code not in (None, 0):
+            print(e)
+    except BaseException:
+        if not from_menu:
+            raise
+        import traceback
+        traceback.print_exc()
+    finally:
+        if from_menu:
+            try:
+                input("\nPress Enter to close...")
+            except (EOFError, KeyboardInterrupt):
+                pass

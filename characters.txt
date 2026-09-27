@@ -1,0 +1,11 @@
+# Your EVE characters, one per line:
+#     short name = character name (exactly as in the EVE window title)
+# The short name is what you type after --profile. The first line is the default.
+# Lines starting with # are ignored.
+
+surt = Surt Boe Agalder
+boah = Boah Tsasa
+scarlett = Scarlettt Tivianne
+cez = Cez McNez
+luck = luck Zhycnu
+zhycnu = Zhycnu Lucky

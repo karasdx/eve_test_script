@@ -5,7 +5,8 @@ A tidied-up version of `eve_test_script`: one entry point, with the logic split 
 ```
 eve_bot/
 ├── main.py              entry point: python main.py <mode> --profile <name>
-├── config.py            characters, hotkeys, timings, thresholds, search regions
+├── characters.txt       your characters: short name = character name (edit freely)
+├── config.py            hotkeys, timings, thresholds, search regions
 ├── requirements.txt
 ├── images/              icon templates in use (images/unused/ = old variants)
 └── bot/
@@ -26,12 +27,23 @@ eve_bot/
 
 ```
 pip install -r requirements.txt
+python main.py                            # menu: pick one function + one character
 python main.py calibrate --profile surt   # optional, see "Save CPU"
 python main.py rat --profile surt
 python main.py alarm --profile cez --profile luck --profile zhycnu
 ```
 
 Stop with Ctrl+C, or move the mouse into a screen corner. That triggers pyautogui's fail-safe.
+
+## Characters
+
+Edit `characters.txt` (or pick **Edit characters** in the menu). One character per line:
+
+```
+surt = Surt Boe Agalder
+```
+
+The left side is the short name you type after `--profile`. The right side is the character name exactly as shown in the EVE window title. The first line is the default.
 
 ## Running several bots at once
 

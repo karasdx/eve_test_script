@@ -15,18 +15,32 @@ from pathlib import Path
 IMAGE_DIR = Path(__file__).parent / "images"
 
 # --------------------------------------------------------------------------
-# Characters (window title = "EVE - <character name>")
-# Pick one with:  python main.py rat --profile surt
+# Characters live in characters.txt (one per line: short name = character name).
+# The first one is the default. Pick one with:  python main.py rat --profile surt
 # --------------------------------------------------------------------------
-PROFILES = {
-    "surt":     "EVE - Surt Boe Agalder",
-    "boah":     "EVE - Boah Tsasa",
-    "scarlett": "EVE - Scarlettt Tivianne",
-    "cez":      "EVE - Cez McNez",
-    "luck":     "EVE - luck Zhycnu",
-    "zhycnu":   "EVE - Zhycnu Lucky",
-}
-DEFAULT_PROFILE = "surt"
+CHARACTERS_FILE = Path(__file__).parent / "characters.txt"
+
+
+def load_profiles(path=CHARACTERS_FILE):
+    """{short name: window title} from characters.txt, in file order."""
+    profiles = {}
+    if not path.exists():
+        raise SystemExit(f"{path.name} not found - create it with lines like: surt = Surt Boe Agalder")
+    for n, line in enumerate(path.read_text(encoding="utf-8-sig").splitlines(), 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        name, sep, character = (part.strip() for part in line.partition("="))
+        if not sep or not name or not character:
+            raise SystemExit(f"{path.name} line {n}: expected 'short name = character name', got: {line}")
+        profiles[name] = "EVE - " + character.removeprefix("EVE - ")
+    if not profiles:
+        raise SystemExit(f"{path.name} has no characters in it")
+    return profiles
+
+
+PROFILES = load_profiles()
+DEFAULT_PROFILE = next(iter(PROFILES))
 
 # --------------------------------------------------------------------------
 # Performance
