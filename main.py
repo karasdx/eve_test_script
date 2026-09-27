@@ -1,6 +1,6 @@
 """
 Usage:
-    python main.py                                      # menu: pick one function + one character
+    python main.py                                      # menu: pick function(s) + one or more characters
     python main.py rat                                  # default profile
     python main.py rat --profile surt --profile boah    # two ratting bots at once
     python main.py autopilot --profile boah
@@ -34,7 +34,8 @@ MENU = [
     ("rat", "Ratting"),
     ("autopilot", "Autopilot"),
     ("alarm", "Local alarm"),
-    ("calibrate", "Calibrate search regions"),
+    ("calibrate", "Calibrate search regions (one character)"),
+    ("multi", "Different function for each character (ratting / autopilot)"),
 ]
 
 
@@ -52,19 +53,45 @@ def pick(prompt, options, default=0):
         print(f"Enter a number from 1 to {len(options)}.")
 
 
-def menu_args():
-    """No command-line arguments: choose ONE function and ONE character."""
-    mode = MENU[pick("Which function to run?", [label for _, label in MENU])][0]
+def pick_characters(single=False):
+    """Numbered list of characters; returns the short names chosen."""
     while True:
         names = list(config.PROFILES)
-        choice = pick("\nWhich character?",
-                      [f"{n}  ({config.PROFILES[n]})" for n in names]
-                      + [f"Edit characters (opens {config.CHARACTERS_FILE.name})"])
-        if choice < len(names):
-            break
-        edit_characters()
+        print("\nWhich character?" if single else
+              "\nWhich characters? e.g. 1  or  1 3 5  or  all")
+        for i, n in enumerate(names, 1):
+            print(f"  {i}. {n}  ({config.PROFILES[n]})" + ("  (default)" if i == 1 else ""))
+        print(f"  E. Edit characters (opens {config.CHARACTERS_FILE.name})")
+        answer = input("> ").strip().lower()
+        if answer == "e":
+            edit_characters()
+            continue
+        if not answer:
+            return names[:1]
+        if answer == "all" and not single:
+            return names
+        parts = answer.replace(",", " ").split()
+        if parts and all(p.isdigit() and 1 <= int(p) <= len(names) for p in parts):
+            chosen = list(dict.fromkeys(names[int(p) - 1] for p in parts))
+            if single and len(chosen) > 1:
+                print("Pick just one character here.")
+                continue
+            return chosen
+        print(f"Enter numbers from 1 to {len(names)}" + ("" if single else ", or 'all'") + ", or E.")
+
+
+def menu_args():
+    """No command-line arguments: choose the function(s) and character(s)."""
+    mode = MENU[pick("Which function to run?", [label for _, label in MENU])][0]
+    profiles = pick_characters(single=(mode == "calibrate"))
+    bots = None
+    if mode == "multi":
+        bots = []
+        for name in profiles:
+            m = list(MODES)[pick(f"\nFunction for {name}?", [dict(MENU)[k] for k in MODES])]
+            bots.append(f"{name}={m}")
     print()
-    return argparse.Namespace(mode=mode, profile=[names[choice]], window=None, bot=None, once=False)
+    return argparse.Namespace(mode=mode, profile=profiles, window=None, bot=bots, once=False)
 
 
 def edit_characters():

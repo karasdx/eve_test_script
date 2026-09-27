@@ -27,7 +27,7 @@ eve_bot/
 
 ```
 pip install -r requirements.txt
-python main.py                            # menu: pick one function + one character
+python main.py                            # menu: pick function(s) + one or more characters
 python main.py calibrate --profile surt   # optional, see "Save CPU"
 python main.py rat --profile surt
 python main.py alarm --profile cez --profile luck --profile zhycnu
