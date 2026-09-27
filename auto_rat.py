@@ -165,30 +165,30 @@ while True:
                 pyautogui.moveTo(game_window.left, game_window.top,
                                  duration=mouse_move_duration)
 
-                pyautogui.click()
-                result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
-                threshold = 0.7
-
-                # Locate the maximum match value in the result
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-                if max_val >= threshold:
+                # pyautogui.click()
+                # result = cv2.matchTemplate(game_screen, image_to_check, cv2.TM_CCOEFF_NORMED)
+                # threshold = 0.7
+                #
+                # # Locate the maximum match value in the result
+                # min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                # if max_val >= threshold:
                     # Get the coordinates of the matched area
-                    target_width, target_height = image_to_check.shape[:-1]
-                    target_X, target_y = max_loc
+                target_width, target_height = image_to_check.shape[:-1]
+                target_X, target_y = max_loc
 
-                    target_center_x = target_X + target_width / 2
-                    target_center_y = target_y + target_height / 2
+                target_center_x = target_X + target_width / 2
+                target_center_y = target_y + target_height / 2
 
-                    pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
-                                     duration=mouse_move_duration)
+                pyautogui.moveTo(target_center_x + game_window.left, target_center_y + game_window.top,
+                                 duration=mouse_move_duration)
 
-                    pyautogui.keyDown("ctrl")
-                    pyautogui.click()
-                    pyautogui.keyUp("ctrl")
+                pyautogui.keyDown("ctrl")
+                pyautogui.click()
+                pyautogui.keyUp("ctrl")
 
-                    time.sleep(10)
-                    pyautogui.press("f")
-                    print('drone engage locked target')
+                time.sleep(10)
+                pyautogui.press("f")
+                print('drone engage locked target')
 
             elif index == 6:
                 if boss_flag == 0:
@@ -216,7 +216,7 @@ while True:
                     unlocked_target_flag = 0
                     for unlocked_target in unlocked_target_list:
                         result = cv2.matchTemplate(game_screen, unlocked_target, cv2.TM_CCOEFF_NORMED)
-                        threshold = 0.7
+                        threshold = 0.65
 
                         # Locate the maximum match value in the result
                         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -305,7 +305,7 @@ while True:
                         print('changing rat site')
                         winsound.Beep(1000, 200)
                         result = cv2.matchTemplate(game_screen, rat_site, cv2.TM_CCOEFF_NORMED)
-                        threshold = 0.8
+                        threshold = 0.7
 
                         # Locate the maximum match value in the result
                         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
@@ -483,6 +483,9 @@ while True:
                                 pyautogui.press("f")
                         else:
                             print("fail to find a new site")
+                            pyautogui.keyDown("shift")
+                            pyautogui.press("f")
+                            pyautogui.keyUp("shift")
 
                 else:
                     idel_count += 1
