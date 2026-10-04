@@ -115,13 +115,14 @@ class Ratting:
                 self.a.log("could not undock")
                 self.later("undock")
                 return
+            elif result == "no_menu":               # drones launched where we are - no retry
+                self.a.log("warp menu not found - drones launched, staying here")
+                self.a.key("drones_engage")
+                return
             elif drones_out:                        # still at the old site, drones relaunched
-                self.a.log(("warp menu" if result == "no_menu" else "new site") +
-                           " not found - drones relaunched")
-                if result == "no_menu":
-                    self.a.key("drones_engage")
+                self.a.log("new site not found - drones relaunched")
                 return
             else:                                   # just undocked: no drones out yet
-                self.a.log(("warp menu" if result == "no_menu" else "new site") + " not found")
+                self.a.log("new site not found")
                 self.later("site")
                 return

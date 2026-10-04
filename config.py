@@ -79,13 +79,12 @@ KEYS = {
 # --------------------------------------------------------------------------
 TIMING = {
     "lock_target": 10,          # wait after ctrl+click before sending drones
-    "align_before_dock": 16,    # after pressing approach, before pressing dock
     "docked_wait_danger": 300,  # stay docked after a hostile appeared
     "docked_wait_fail": 60,     # stay docked after failing to find orbit point
     "dock_timeout": 60,         # keep pressing dock until docked, at most this long
     "dock_retry": 10,           # press dock again if not docked after this long
     "orbit_wait": 20,           # after landing, wait this long for the orbit point
-    "drones_launch": 8,         # drones must show up this long after launching
+    "drones_launch": 8,         # header must read (5/5) this long after Shift+F, else press again
     "danger_poll": 1,           # how often to look for danger during long waits
     "site_retry": 30,           # no site / could not undock: try again after this long
     "after_undock": 20,
@@ -95,7 +94,7 @@ TIMING = {
     "warp_poll": 3,
     "warp_timeout": 180,
     "menu_open": 0.6,           # right-click menu needs time to appear
-    "recall_retry": 3,          # re-check drones after this long, retry if still out
+    "recall_wait": 10,          # wait this long for (0/5) after Shift+R, then press it again (3 tries)
     "idle_ticks_limit": 20,     # ticks of idle drones before checking the site is done
     "autopilot_settle": 15,
     "autopilot_max_misses": 10,
@@ -119,6 +118,10 @@ TEMPLATES = {
     "ewar_paint":    ("painted.png", 0.82, False, None),
     # status
     "drones_idle":   ("drone.png", 0.82, False, None),
+    # "Drones in Space" header: (5/5) = all launched, (0/5) = all home.
+    # They differ by one digit, so both are checked and the closer match wins.
+    "drones_out":    ("drones_in_space_5.png", 0.85, False, None),
+    "drones_home":   ("drones_in_space_0.png", 0.85, False, None),
     "boss_wreck":    ("boss_wreck(A).png", 0.82, False, None),
     "warping":       ("warping.png", 0.80, False, None),
     # targets

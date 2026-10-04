@@ -134,26 +134,50 @@ class Actions:
             time.sleep(self.t["danger_poll"])
 
     # ---- drones -------------------------------------------------------
-    def recall_drones(self, attempts=3):
-        """Shift+R, then check the idle-drone list is gone and retry if not."""
+    def recall_drones(self, attempts=3, already_pressed=False):
+        """Shift+R, then wait for the header to read (0/5); press it again if
+        the drones aren't back in time. Returns True once they are all home."""
         for i in range(1, attempts + 1):
-            self.retry(lambda: self.key("recall_drones"))
-            time.sleep(self.t["recall_retry"])
-            if not self.find_fresh("drones_idle"):
+            if i > 1 or not already_pressed:
+                self.retry(lambda: self.key("recall_drones"))
+            if self.wait_drones("home", self.t["recall_wait"]) == "home":
                 return True
-            self.log(f"drones still out after recall attempt {i}/{attempts}")
+            self.log(f"drones not back after recall attempt {i}/{attempts}")
         return False
 
+    def drones_state(self, s=None):
+        """Read the "Drones in Space" header: 'out' = (5/5), 'home' = (0/5),
+        None = neither visible. The two differ by one digit, so both are
+        checked and the closer match wins."""
+        s = s or self.screen.grab()
+        out, home = s.find("drones_out"), s.find("drones_home")
+        if out and (not home or out.score > home.score):
+            return "out"
+        return "home" if home else None
+
+    def wait_drones(self, want, seconds, watch_danger=False):
+        """Poll until drones_state() == want. Returns want, 'danger' or None."""
+        deadline = time.time() + seconds
+        while True:
+            s = self.screen.grab()
+            if watch_danger and self.danger and s.find_any(self.danger):
+                return "danger"
+            if self.drones_state(s) == want:
+                return want
+            if time.time() >= deadline:
+                return None
+            time.sleep(self.t["danger_poll"])
+
     def launch_drones(self, attempts=3, already_pressed=False):
-        """Shift+F, then check the drones are in space (idle-drone list shows
-        up) and press it again if not. Returns 'ok', 'danger' or 'failed'."""
+        """Shift+F, then check the header reads (5/5) and press it again if
+        not. Returns 'ok', 'danger' or 'failed'."""
         for i in range(1, attempts + 1):
             if i > 1 or not already_pressed:
                 self.retry(lambda: self.key("launch_drones"))
-            state, _ = self.wait_for("drones_idle", self.t["drones_launch"])
-            if state != "timeout":
-                return "ok" if state == "found" else "danger"
-            self.log(f"drones not out after launch attempt {i}/{attempts}")
+            state = self.wait_drones("out", self.t["drones_launch"], watch_danger=True)
+            if state:
+                return "ok" if state == "out" else "danger"
+            self.log(f"drones not out (5/5) after launch attempt {i}/{attempts}")
         return "failed"
 
     def lock_and_engage(self, match):
@@ -185,21 +209,29 @@ class Actions:
     def is_docked(self):
         return self.find_fresh("undock") is not None
 
-    def dock_at_safe_station(self):
-        """Approach + dock, then wait until we really are docked (undock button
-        visible), pressing dock again if needed."""
+    def dock_at_safe_station(self, recall=True):
+        """Align to the safe station and recall drones at the same time, wait
+        until the drones are home (0/5), then warp + dock. Confirms we really
+        are docked (undock button visible), pressing dock again if needed."""
         station = self.find_fresh("safe_station")
         if not station:
             self.log("safe station not found in overview!")
+            if recall:
+                self.recall_drones()
             return False
 
         def start():
-            with self.input():                      # one burst: select, prop, approach
+            with self.input():                      # one burst: select, prop, align, recall
                 self.ctl.click(*station.center)
                 self.ctl.hotkey(*self.keys["prop_module"])
                 self.ctl.hotkey(*self.keys["approach"])
+                if recall:
+                    self.ctl.hotkey(*self.keys["recall_drones"])
         self.retry(start)
-        time.sleep(self.t["align_before_dock"])
+        self.log("aligning to safe station" + (", recalling drones" if recall else ""))
+
+        if recall and not self.recall_drones(already_pressed=True):
+            self.log("drones not back (0/5) - warping to station anyway")
 
         deadline = time.time() + self.t["dock_timeout"]
         while time.time() < deadline:
@@ -234,10 +266,9 @@ class Actions:
         gets routine input until we are docked. Then stay docked a while.
         Returns True once docked and the wait is over."""
         with self.operation(URGENT):
-            self.recall_drones()
             docked = self.dock_at_safe_station()
             if not docked:                          # one more go before giving up
-                docked = self.dock_at_safe_station()
+                docked = self.dock_at_safe_station(recall=self.drones_state() != "home")
         if docked:
             self.log(f"docked, waiting {stay_seconds}s")
             time.sleep(stay_seconds)
@@ -261,11 +292,12 @@ class Actions:
         recall=False: drones are already in the bay (just undocked).
 
         Returns 'ok', 'danger', 'no_site', 'no_menu', 'no_orbit' or 'no_drones'.
-        On 'no_site' / 'no_menu' the drones are relaunched if they were out."""
+        On 'no_menu' the drones are launched (no further warp attempts);
+        on 'no_site' they are relaunched if they were out."""
         with self.operation(SITE):
             if recall:
-                self.recall_drones()
-                if self.watch(self.t["drones_return"]):
+                home = self.recall_drones()         # waits for (0/5)
+                if self.watch(0 if home else self.t["drones_return"]):
                     return "danger"
 
             site = self.find_fresh("rat_site")
@@ -285,8 +317,7 @@ class Actions:
                     return item is not None
             if not self.retry(warp):
                 self.retry(lambda: self.press_esc())  # close the menu if it is open
-                if recall:
-                    self.launch_drones()
+                self.launch_drones()                  # no warp: just fight here
                 return "no_menu"
             self.log("warping to new site")
 
