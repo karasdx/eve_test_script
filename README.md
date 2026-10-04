@@ -56,7 +56,8 @@ Each client gets its own thread. They share a single **input lock** (`bot/input_
 
 - A bot takes the lock, brings its own client to the front, clicks or presses keys, then releases it. A burst like that lasts well under a second.
 - Screenshots, matching and all the long waits (docked 300 s, aligning, locking targets) happen **without** holding the lock. The bots only queue up for the moments they need the mouse or keyboard.
-- A bot that is **fleeing** from a hostile goes to the front of the queue.
+- A bot that is **fleeing** from a hostile goes to the front of the queue, and no other account gets routine input until it has docked (confirmed by the undock button showing).
+- **Changing site** is one uninterrupted operation: recall drones → warp → land → orbit → launch drones, with a check that the drones really are out (relaunched up to 3 times). Other accounts wait until it is finished, except one that is fleeing. Danger is checked all through it; if a hostile shows up, the site change stops and the bot flees as soon as it can (after landing, if it is mid-warp).
 - If a client can't be brought to the front, that input is skipped rather than sent to another bot's window.
 - The right-click → "Warp to" and bookmark → Enter steps each keep the lock for the whole step, so another bot can't close the menu partway through.
 - A crash in one bot is logged and the others keep running. Moving the mouse into a screen corner stops **all** bots.

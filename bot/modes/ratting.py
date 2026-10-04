@@ -6,6 +6,10 @@ Each tick takes ONE screenshot and decides, in priority order:
   3. boss wreck (once per site)  -> bookmark it
   4. drones idle                 -> count; after N ticks lock remaining
                                     targets, or move to the next site
+
+Changing site is one uninterrupted operation (recall -> warp -> land -> orbit
+-> drones out, checked). Danger is still watched the whole time and wins:
+if it shows up, the site change stops and the bot flees.
 """
 import time
 
@@ -66,25 +70,26 @@ class Ratting:
                 self.a.lock_and_engage(t)
             return
 
-        self.a.log("site cleared")
+        self.a.log("site cleared - changing site")
         self.boss_bookmarked = False
-        self.a.recall_drones()
-        time.sleep(self.cfg.TIMING["drones_return"])
         beep()
 
-        result = self.a.warp_to_next_site()
+        # one uninterrupted operation; returns only when it is finished
+        result = self.a.change_site()
         if result == "ok":
             return
-        if result == "no_orbit":
-            self.a.log("could not orbit - docking up")
+        if result == "danger":
+            beep()
+            self.a.log("DANGER during site change - running to station")
+            self.a.flee(self.cfg.TIMING["docked_wait_danger"])
+            self.idle_ticks = self.limit + 1
+        elif result in ("no_orbit", "no_drones"):
+            what = "orbit point not found" if result == "no_orbit" else "drones did not launch"
+            self.a.log(f"{what} after landing - docking up")
             self.a.flee(self.cfg.TIMING["docked_wait_fail"])
             self.idle_ticks = self.limit + 1
         elif result == "no_menu":
-            self.a.log("warp menu not found - relaunching drones")
-            time.sleep(5)
-            self.a.launch_drones()
-            time.sleep(3)
+            self.a.log("warp menu not found - drones relaunched")
             self.a.key("drones_engage")
         else:
-            self.a.log("no new site found - relaunching drones")
-            self.a.launch_drones()
+            self.a.log("no new site found - drones relaunched")

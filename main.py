@@ -175,7 +175,8 @@ def main():
         controls = Controls(config.KEY_HOLD_SECONDS, config.KEY_GAP_SECONDS,
                             config.MOUSE_MOVE_SECONDS, config.USE_DIRECTINPUT)
         actions = Actions(Screen(windows[title], templates), controls,
-                          config.KEYS, config.TIMING, lock=lock, name=name)
+                          config.KEYS, config.TIMING, lock=lock, name=name,
+                          danger=config.DANGER)
         runnables.append((name, MODES[mode](actions, config).run))
 
     print("Running", ", ".join(f"{n} ({m})" for (n, _), (_, m) in zip(runnables, bots)))

@@ -82,6 +82,11 @@ TIMING = {
     "align_before_dock": 16,    # after pressing approach, before pressing dock
     "docked_wait_danger": 300,  # stay docked after a hostile appeared
     "docked_wait_fail": 60,     # stay docked after failing to find orbit point
+    "dock_timeout": 60,         # keep pressing dock until docked, at most this long
+    "dock_retry": 10,           # press dock again if not docked after this long
+    "orbit_wait": 20,           # after landing, wait this long for the orbit point
+    "drones_launch": 8,         # drones must show up this long after launching
+    "danger_poll": 1,           # how often to look for danger during long waits
     "after_undock": 20,
     "before_modules": 14,
     "drones_return": 15,        # after recalling drones before warping off
@@ -104,7 +109,7 @@ TEMPLATES = {
     "enemy_red":     ("enemy(1).png", 0.82, True, None),
     "enemy_neutral": ("enemy(2).png", 0.82, True, None),
     "enemy_orange":  ("enemy(3).png", 0.82, True, None),
-    "dread":         ("dread.png", 0.82, True, None),
+    "dread":         ("dread.png", 0.85, True, None),
     "warp_bubble":   ("babo.png", 0.82, False, None),   # "Mobile Small Warp..."
     # ewar on us -> kill that rat first
     "ewar_neut":     ("cap_neutralized.png", 0.82, False, None),
