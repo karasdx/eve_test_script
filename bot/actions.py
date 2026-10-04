@@ -212,25 +212,27 @@ class Actions:
         self.log("still not docked - giving up on this attempt")
         return False
 
-    def undock_and_prepare(self):
-        """Undock, stop, launch drones, tank on - all before other accounts move."""
-        with self.operation(SITE):
-            button = self.find_fresh("undock")
-            if not button:
-                self.log("undock button not found")
-                return False
-            self.retry(lambda: self.click(button))
-            self.log("undocking")
-            time.sleep(self.t["after_undock"])
-            self.retry(lambda: self.key("stop_ship"))
-            time.sleep(self.t["before_modules"])
-            self.launch_drones()
-            self.retry(lambda: self.keys_each("tank_modules"))
-            return True
+    def undock(self):
+        """Undock, stop, tank on - no drones (they launch at the site).
+        Returns 'ok', 'danger' or 'failed'."""
+        button = self.find_fresh("undock")
+        if not button:
+            self.log("undock button not found")
+            return "failed"
+        self.retry(lambda: self.click(button))
+        self.log("undocking")
+        if self.watch(self.t["after_undock"]):
+            return "danger"
+        self.retry(lambda: self.key("stop_ship"))
+        if self.watch(self.t["before_modules"]):
+            return "danger"
+        self.retry(lambda: self.keys_each("tank_modules"))
+        return "ok"
 
     def flee(self, stay_seconds):
         """Recall drones and dock - ahead of everything else, and nobody else
-        gets routine input until we are docked. Then wait and undock again."""
+        gets routine input until we are docked. Then stay docked a while.
+        Returns True once docked and the wait is over."""
         with self.operation(URGENT):
             self.recall_drones()
             docked = self.dock_at_safe_station()
@@ -239,23 +241,37 @@ class Actions:
         if docked:
             self.log(f"docked, waiting {stay_seconds}s")
             time.sleep(stay_seconds)
-            self.undock_and_prepare()
+        return docked
 
-    def change_site(self):
+    def undock_to_site(self):
+        """Undock and, if no enemies, warp straight to a new site - one operation.
+        Returns 'no_undock' or the result of change_site()."""
+        with self.operation(SITE):
+            result = self.undock()
+            if result == "failed":
+                return "no_undock"
+            if result == "danger" or self.danger_on_screen():
+                return "danger"
+            return self.change_site(recall=False)
+
+    def change_site(self, recall=True):
         """The whole site change as ONE operation: recall drones, warp, land,
         orbit, launch drones (checked). Other accounts only get routine input
         once it is finished. Danger is checked throughout.
+        recall=False: drones are already in the bay (just undocked).
 
         Returns 'ok', 'danger', 'no_site', 'no_menu', 'no_orbit' or 'no_drones'.
-        On 'no_site' / 'no_menu' the drones have been launched again."""
+        On 'no_site' / 'no_menu' the drones are relaunched if they were out."""
         with self.operation(SITE):
-            self.recall_drones()
-            if self.watch(self.t["drones_return"]):
-                return "danger"
+            if recall:
+                self.recall_drones()
+                if self.watch(self.t["drones_return"]):
+                    return "danger"
 
             site = self.find_fresh("rat_site")
             if not site:
-                self.launch_drones()
+                if recall:
+                    self.launch_drones()
                 return "no_site"
 
             # right-click menu -> "Warp to" in one burst, so nothing can close the menu
@@ -269,7 +285,8 @@ class Actions:
                     return item is not None
             if not self.retry(warp):
                 self.retry(lambda: self.press_esc())  # close the menu if it is open
-                self.launch_drones()
+                if recall:
+                    self.launch_drones()
                 return "no_menu"
             self.log("warping to new site")
 

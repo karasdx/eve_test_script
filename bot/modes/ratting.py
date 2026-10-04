@@ -1,7 +1,9 @@
 """Auto-ratting loop (replaces auto_rat.py / auto_rat_2.py / main.py).
 
 Each tick takes ONE screenshot and decides, in priority order:
-  1. danger in local / on grid   -> recall drones, dock, wait, undock
+  1. danger in local / on grid   -> recall drones, dock, wait, undock and
+                                    warp straight to a new site (drones are
+                                    launched only after landing there)
   2. a rat is applying ewar      -> lock it and send drones
   3. boss wreck (once per site)  -> bookmark it
   4. drones idle                 -> count; after N ticks lock remaining
@@ -25,6 +27,8 @@ class Ratting:
         self.idle_ticks = 0
         self.boss_bookmarked = False
         self.limit = cfg.TIMING["idle_ticks_limit"]
+        self.pending = None             # "undock" / "site": try again at pending_at
+        self.pending_at = 0.0
 
     def run(self):
         self.a.log("ratting started")
@@ -40,16 +44,21 @@ class Ratting:
 
         hit = s.find_any(self.cfg.DANGER)
         if hit:
-            beep()
-            self.a.log(f"DANGER: {hit.name} ({hit.score:.2f}) - running to station")
-            self.a.flee(self.cfg.TIMING["docked_wait_danger"])
-            self.idle_ticks = self.limit + 1        # re-check targets right away
+            self.a.log(f"DANGER: {hit.name} ({hit.score:.2f})")
+            self.handle("danger")
             return
 
         hit = s.find_any(self.cfg.EWAR)
         if hit:
             self.a.log(f"ewar on us: {hit.name}")
             self.a.lock_and_engage(hit)
+            return
+
+        if self.pending:                            # undock / warp that couldn't happen yet
+            if time.time() >= self.pending_at:
+                action, self.pending = self.pending, None
+                self.handle(self.a.undock_to_site() if action == "undock"
+                            else self.a.change_site(recall=False), drones_out=False)
             return
 
         if not self.boss_bookmarked and s.visible("boss_wreck"):
@@ -75,21 +84,44 @@ class Ratting:
         beep()
 
         # one uninterrupted operation; returns only when it is finished
-        result = self.a.change_site()
-        if result == "ok":
-            return
-        if result == "danger":
-            beep()
-            self.a.log("DANGER during site change - running to station")
-            self.a.flee(self.cfg.TIMING["docked_wait_danger"])
-            self.idle_ticks = self.limit + 1
-        elif result in ("no_orbit", "no_drones"):
-            what = "orbit point not found" if result == "no_orbit" else "drones did not launch"
-            self.a.log(f"{what} after landing - docking up")
-            self.a.flee(self.cfg.TIMING["docked_wait_fail"])
-            self.idle_ticks = self.limit + 1
-        elif result == "no_menu":
-            self.a.log("warp menu not found - drones relaunched")
-            self.a.key("drones_engage")
-        else:
-            self.a.log("no new site found - drones relaunched")
+        self.handle(self.a.change_site(), drones_out=True)
+
+    def later(self, action):
+        wait = self.cfg.TIMING["site_retry"]
+        self.a.log(f"trying again in {wait}s")
+        self.pending, self.pending_at = action, time.time() + wait
+
+    def handle(self, result, drones_out=True):
+        """Act on the result of a site change. Danger / failed landing -> dock,
+        wait, then undock and warp straight to a new site (no drones until we
+        land there); repeats if the same happens again."""
+        t = self.cfg.TIMING
+        while result != "ok":
+            if result in ("danger", "no_orbit", "no_drones"):
+                beep()
+                self.a.log({"danger": "DANGER - running to station",
+                            "no_orbit": "orbit point not found after landing - docking up",
+                            "no_drones": "drones did not launch - docking up"}[result])
+                stay = t["docked_wait_danger"] if result == "danger" else t["docked_wait_fail"]
+                if not self.a.flee(stay):
+                    self.a.log("could not dock - will warp to a site once it is clear")
+                    self.later("site")
+                    return
+                self.idle_ticks = 0
+                self.boss_bookmarked = False
+                result = self.a.undock_to_site()
+                drones_out = False
+            elif result == "no_undock":
+                self.a.log("could not undock")
+                self.later("undock")
+                return
+            elif drones_out:                        # still at the old site, drones relaunched
+                self.a.log(("warp menu" if result == "no_menu" else "new site") +
+                           " not found - drones relaunched")
+                if result == "no_menu":
+                    self.a.key("drones_engage")
+                return
+            else:                                   # just undocked: no drones out yet
+                self.a.log(("warp menu" if result == "no_menu" else "new site") + " not found")
+                self.later("site")
+                return

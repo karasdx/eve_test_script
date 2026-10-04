@@ -87,6 +87,7 @@ TIMING = {
     "orbit_wait": 20,           # after landing, wait this long for the orbit point
     "drones_launch": 8,         # drones must show up this long after launching
     "danger_poll": 1,           # how often to look for danger during long waits
+    "site_retry": 30,           # no site / could not undock: try again after this long
     "after_undock": 20,
     "before_modules": 14,
     "drones_return": 15,        # after recalling drones before warping off
