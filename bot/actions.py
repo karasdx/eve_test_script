@@ -91,10 +91,6 @@ class Actions:
         with self.input():
             self.ctl.press_each(*self.keys[action])
 
-    def press_esc(self):
-        with self.input():
-            self.ctl.hotkey("esc")
-
     def click(self, match, button="left", modifier=None):
         with self.input():
             self.ctl.click(*match.center, button=button, modifier=modifier)
@@ -316,7 +312,6 @@ class Actions:
                         self.ctl.click(*item.center)
                     return item is not None
             if not self.retry(warp):
-                self.retry(lambda: self.press_esc())  # close the menu if it is open
                 self.launch_drones()                  # no warp: just fight here
                 return "no_menu"
             self.log("warping to new site")
