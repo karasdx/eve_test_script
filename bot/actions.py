@@ -190,17 +190,30 @@ class Actions:
 
     # ---- travel -------------------------------------------------------
     def wait_for_warp(self):
-        """Wait until the warp ends. Returns (finished, danger seen meanwhile)."""
+        """Keep checking the "warping" image: first wait for it to show up (the
+        ship aligns before it enters warp), then until it is gone, then
+        settle for after_warp seconds. Returns (finished, danger seen meanwhile)."""
         danger = None
+        started = False
+        start_by = time.time() + self.t["warp_start"]
         deadline = time.time() + self.t["warp_timeout"]
         while time.time() < deadline:
             s = self.screen.grab()
             danger = danger or (s.find_any(self.danger) if self.danger else None)
-            if not s.find("warping"):
-                return True, danger
+            if s.find("warping"):
+                started = True
+            elif started:
+                self.log("out of warp")
+                break
+            elif time.time() >= start_by:
+                self.log("never saw the warp start - carrying on")
+                break
             time.sleep(self.t["warp_poll"])
-        self.log("warp did not finish in time")
-        return False, danger
+        else:
+            self.log("warp did not finish in time")
+            return False, danger
+        hit = self.watch(self.t["after_warp"])
+        return True, danger or hit
 
     def is_docked(self):
         return self.find_fresh("undock") is not None
@@ -251,10 +264,12 @@ class Actions:
         self.log("undocking")
         if self.watch(self.t["after_undock"]):
             return "danger"
-        self.retry(lambda: self.key("stop_ship"))
-        if self.watch(self.t["before_modules"]):
-            return "danger"
-        self.retry(lambda: self.keys_each("tank_modules"))
+
+        def buttons():                              # one burst: stop, tank on
+            with self.input():
+                self.ctl.hotkey(*self.keys["stop_ship"])
+                self.ctl.press_each(*self.keys["tank_modules"])
+        self.retry(buttons)
         return "ok"
 
     def flee(self, stay_seconds):
@@ -316,9 +331,8 @@ class Actions:
                 return "no_menu"
             self.log("warping to new site")
 
-            danger = self.watch(self.t["warp_start"])
-            _, seen = self.wait_for_warp()
-            if danger or seen:
+            _, seen = self.wait_for_warp()          # landed + after_warp seconds
+            if seen:
                 return "danger"                     # landed - now run
 
             # landing: the overview can take a moment to show the orbit point
