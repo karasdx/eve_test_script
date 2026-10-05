@@ -98,7 +98,7 @@ TIMING = {
     "drones_launch": 8,         # header must read (5/5) this long after Shift+F, else press again
     "danger_poll": 1,           # how often to look for danger during long waits
     "site_retry": 30,           # no site / could not undock: try again after this long
-    "after_undock": 5,          # after clicking undock: wait, then stop + tank modules, then warp
+    "after_undock": 10,         # after clicking undock: wait, then stop + tank modules, then warp
     "drones_return": 15,        # after recalling drones before warping off
     "warp_start": 30,           # give up waiting for the warp to START after this long
     "warp_poll": 0.5,           # how often to check the "warping" image
