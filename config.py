@@ -15,6 +15,16 @@ from pathlib import Path
 IMAGE_DIR = Path(__file__).parent / "images"
 
 # --------------------------------------------------------------------------
+# UI scaling (EVE: Settings > Display & Graphics > UI Scaling)
+# --------------------------------------------------------------------------
+UI_SCALE = 150              # your clients' UI scaling in %: 100, 125 or 150
+IMAGES_UI_SCALE = 150       # the UI scaling the pictures in images/ were taken at
+# The pictures are resized by UI_SCALE / IMAGES_UI_SCALE when the bot starts.
+# For best accuracy put screenshots taken at that scaling in images/125/ or
+# images/150/ (same file names) - those are used as-is instead of resizing.
+# Not sure which scaling the pictures are at? Run calibrate: it tests each one.
+
+# --------------------------------------------------------------------------
 # Characters live in characters.txt (one per line: short name = character name).
 # The first one is the default. Pick one with:  python main.py rat --profile surt
 # --------------------------------------------------------------------------
@@ -69,7 +79,7 @@ KEYS = {
     "bookmark":      ("ctrl", "b"),
     "confirm":       ("enter",),
     "prop_module":   ("f1",),
-    "tank_modules":  ("f2", "f3", "f4"),   # pressed one after another
+    "tank_modules":  ("f2", "f3"),         # pressed one after another, after undock + stop
     "autopilot_end": ("ctrl", "s"),        # what the old auto_pilot pressed at the end
     "lock_modifier": "ctrl",               # ctrl+click = lock target
 }

@@ -35,6 +35,13 @@ python main.py alarm --profile cez --profile luck --profile zhycnu
 
 Stop with Ctrl+C, or move the mouse into a screen corner. That triggers pyautogui's fail-safe.
 
+## UI scaling (100 / 125 / 150 %)
+
+Set `UI_SCALE` in `config.py` to the scaling your clients use (EVE: Settings > Display & Graphics > UI Scaling). The pictures in `images/` are resized to match when the bot starts. `IMAGES_UI_SCALE` says which scaling those pictures were taken at (150 - all the included screenshots were taken at 150 %).
+
+- Not sure? Run `python main.py calibrate --profile surt` with local, the overview and the drone window open. It tests 100, 125 and 150 % and tells you which one fits.
+- For the most reliable matching, take your own screenshots at that scaling and put them in `images/125/` or `images/150/` with the same file names. Those are used as they are, without resizing. You only need the ones that give trouble.
+
 ## Characters
 
 Edit `characters.txt` (or pick **Edit characters** in the menu). One character per line:

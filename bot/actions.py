@@ -268,6 +268,7 @@ class Actions:
         def buttons():                              # one burst: stop, tank on
             with self.input():
                 self.ctl.hotkey(*self.keys["stop_ship"])
+                time.sleep(0.3)                     # let the stop register first
                 self.ctl.press_each(*self.keys["tank_modules"])
         self.retry(buttons)
         return "ok"

@@ -45,15 +45,29 @@ class Match:
         return self.x + self.w // 2, self.y + self.h // 2
 
 
-def load_templates(image_dir, specs):
+def load_templates(image_dir, specs, ui_scale=100, images_scale=100):
+    """Load every template, sized for the game's UI scaling.
+
+    ui_scale     : the client's UI scaling in %, e.g. 100 / 125 / 150
+    images_scale : the UI scaling the pictures in image_dir were taken at
+    A picture in image_dir/<ui_scale>/ (e.g. images/125/drone.png) is used
+    as-is; otherwise the normal picture is resized by ui_scale / images_scale.
+    """
+    factor = ui_scale / images_scale
+    own_dir = image_dir / str(ui_scale)
     templates = {}
     missing = []
     for name, (filename, threshold, colour, region) in specs.items():
-        path = image_dir / filename
+        own = own_dir / filename
+        path, f = (own, 1.0) if own.exists() else (image_dir / filename, factor)
         bgr = cv2.imread(str(path), cv2.IMREAD_COLOR)
         if bgr is None:           # cv2.imread fails silently - check it here
             missing.append(str(path))
             continue
+        if f != 1.0:
+            h, w = bgr.shape[:2]
+            bgr = cv2.resize(bgr, (max(1, round(w * f)), max(1, round(h * f))),
+                             interpolation=cv2.INTER_AREA if f < 1 else cv2.INTER_CUBIC)
         gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
         templates[name] = Template(name, bgr, gray, threshold, colour, region)
     if missing:

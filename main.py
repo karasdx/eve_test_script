@@ -23,7 +23,7 @@ import cv2
 import config
 from bot import Actions, Controls, Screen, find_window, load_templates
 from bot.input_lock import InputLock
-from bot.modes import Alarm, Autopilot, Ratting, calibrate
+from bot.modes import Alarm, Autopilot, Ratting, calibrate, detect_scale
 from bot.runner import run_bots
 from bot.window import overlapping
 
@@ -154,7 +154,8 @@ def main():
     bots = bot_list(args)
     # several bots in parallel -> keep each one's OpenCV to a single thread
     cv2.setNumThreads(1 if len(bots) > 1 else config.CV_THREADS)
-    templates = load_templates(config.IMAGE_DIR, config.TEMPLATES)
+    templates = load_templates(config.IMAGE_DIR, config.TEMPLATES,
+                               config.UI_SCALE, config.IMAGES_UI_SCALE)
 
     windows = {title: find_window(title) for title, _ in bots}
     warn_layout(list(windows.values()))
@@ -165,7 +166,9 @@ def main():
         return
 
     if args.mode == "calibrate":
-        calibrate(Screen(windows[bots[0][0]], templates), templates)
+        screen = Screen(windows[bots[0][0]], templates)
+        detect_scale(screen, config)
+        calibrate(screen, templates)
         return
 
     lock = InputLock()                       # shared by every bot

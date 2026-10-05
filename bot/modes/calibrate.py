@@ -2,7 +2,42 @@
 
 Open the windows you care about (local, overview, drones, a rat site) so the
 icons are visible, then run:  python main.py calibrate --profile surt
+It also tests which UI scaling (100 / 125 / 150 %) fits the pictures best.
 """
+from ..vision import load_templates
+
+
+def detect_scale(screen, cfg, scales=(100, 125, 150)):
+    """Try each UI scaling against the current screen and recommend one."""
+    screen.grab()
+    original = screen.templates
+    results = []
+    print("UI scaling test (needs some icons on screen: local, overview, drones...)")
+    try:
+        for scale in scales:
+            screen.templates = load_templates(cfg.IMAGE_DIR, cfg.TEMPLATES,
+                                              scale, cfg.IMAGES_UI_SCALE)
+            found, best = 0, []
+            for name, t in screen.templates.items():
+                m = screen.find(name, threshold=-1)
+                score = m.score if m else 0.0
+                found += score >= t.threshold
+                best.append(score)
+            top = sorted(best, reverse=True)[:5]
+            avg = sum(top) / len(top)
+            results.append((found, avg, scale))
+            print(f"  {scale:3d}%: {found:2d} icons found, best scores avg {avg:.2f}")
+    finally:
+        screen.templates = original
+    found, avg, scale = max(results)
+    if found == 0:
+        print("  no icons recognised at any scaling - open local / overview / drones and retry")
+    elif scale == cfg.UI_SCALE:
+        print(f"  -> UI_SCALE = {scale} in config.py is right")
+    else:
+        print(f"  -> set UI_SCALE = {scale} in config.py (it is {cfg.UI_SCALE} now)")
+    print()
+    return scale
 
 
 def calibrate(screen, templates, pad=0.08):
