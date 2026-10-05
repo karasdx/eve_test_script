@@ -84,6 +84,7 @@ TIMING = {
     "dock_timeout": 60,         # keep pressing dock until docked, at most this long
     "dock_retry": 10,           # press dock again if not docked after this long
     "orbit_wait": 20,           # after landing, wait this long for the orbit point
+    "orbit_check": 5,           # "Orbiting" must show this long after W, else orbit again (3 tries)
     "drones_launch": 8,         # header must read (5/5) this long after Shift+F, else press again
     "danger_poll": 1,           # how often to look for danger during long waits
     "site_retry": 30,           # no site / could not undock: try again after this long
@@ -134,6 +135,7 @@ TEMPLATES = {
     "rat_site":      ("rat_site(A).png", 0.70, False, None),
     "warp_to":       ("wrap_to_10.png", 0.65, False, None),
     "orbit_point":   ("orbit_point_new.png", 0.85, False, None),
+    "orbiting":      ("orbiting.png", 0.80, False, None),    # HUD text after W
     "target_gate":   ("target_gate.png", 0.70, True, None),
 }
 

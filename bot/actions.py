@@ -353,5 +353,29 @@ class Actions:
             result = self.launch_drones(already_pressed=True)
             if result != "ok":
                 return "danger" if result == "danger" else "no_drones"
+
+            result = self.check_orbit()
+            if result != "ok":
+                return result
             self.log("arrived: orbiting, drones out")
             return "ok"
+
+    def check_orbit(self, attempts=3):
+        """Make sure the HUD says "Orbiting"; if not, click the orbit point and
+        press orbit again. Returns 'ok', 'danger' or 'no_orbit'."""
+        for i in range(1, attempts + 1):
+            state, _ = self.wait_for("orbiting", self.t["orbit_check"])
+            if state != "timeout":
+                return "ok" if state == "found" else "danger"
+            self.log(f"not orbiting - orbit again ({i}/{attempts})")
+            point = self.find_fresh("orbit_point")
+            if not point:
+                return "no_orbit"
+
+            def orbit():                            # orbit only: F1 would toggle prop off
+                with self.input():
+                    self.ctl.click(*point.center)
+                    self.ctl.hotkey(*self.keys["orbit"])
+            self.retry(orbit)
+        state, _ = self.wait_for("orbiting", self.t["orbit_check"])
+        return {"found": "ok", "danger": "danger"}.get(state, "no_orbit")
